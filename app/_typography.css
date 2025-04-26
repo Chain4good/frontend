@@ -1,0 +1,19 @@
+.title-sm {
+  @apply text-xl font-semibold;
+}
+
+.title-md {
+  @apply text-2xl font-semibold;
+}
+
+.title-lg {
+  @apply text-3xl font-semibold;
+}
+
+.title-xl {
+  @apply text-4xl font-semibold;
+}
+
+.title-xxl {
+  @apply text-5xl font-semibold;
+}

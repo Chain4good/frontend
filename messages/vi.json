@@ -1,0 +1,119 @@
+{
+  "Home": {
+    "title": "Tạo chiến dịch",
+    "createCampaignBtn": "Tạo"
+  },
+  "Header": {
+    "search": "Tìm kiếm",
+    "donate": {
+      "title": "Quyên góp",
+      "children": {
+        "title": "Khám phá các chiến dịch gây quỹ để ủng hộ",
+        "children": {
+          "category": {
+            "title": "Danh mục",
+            "sub": "Duyệt các chiến dịch theo danh mục"
+          },
+          "crisisRelief": {
+            "title": "Hỗ trợ khẩn cấp",
+            "sub": "Quyên góp cho các tổ chức cứu trợ đã được xác minh"
+          },
+          "social": {
+            "title": "Quỹ tác động xã hội",
+            "sub": "Hỗ trợ trực tiếp cho các nhu cầu cấp thiết"
+          },
+          "supporterSpace": {
+            "title": "Không gian ủng hộ",
+            "sub": "Nguồn cảm hứng, câu hỏi thường gặp và nơi để quyên góp"
+          }
+        }
+      }
+    },
+    "fundraise": {
+      "title": "Gây quỹ",
+      "children": {
+        "title": "Bắt đầu gây quỹ, mẹo và tài nguyên",
+        "children": {
+          "howTo": {
+            "title": "Cách bắt đầu một chiến dịch Chain4Good",
+            "sub": "Hướng dẫn từng bước, ví dụ minh họa và hơn thế nữa"
+          },
+          "categories": {
+            "title": "Danh mục gây quỹ",
+            "sub": "Tìm danh mục phù hợp với bạn"
+          },
+          "team": {
+            "title": "Gây quỹ theo nhóm",
+            "sub": "Gây quỹ cùng với một nhóm"
+          },
+          "blog": {
+            "title": "Blog về gây quỹ",
+            "sub": "Tài nguyên, mẹo và nhiều nội dung khác"
+          },
+          "tips": {
+            "title": "Mẹo gây quỹ",
+            "sub": "Hướng dẫn mẹo gây quỹ toàn diện"
+          },
+          "ideas": {
+            "title": "Ý tưởng gây quỹ",
+            "sub": "Ý tưởng truyền cảm hứng cho sự sáng tạo của bạn"
+          },
+          "charity": {
+            "title": "Blog về gây quỹ",
+            "sub": "Gây quỹ cho một tổ chức từ thiện"
+          },
+          "claim": {
+            "title": "Đăng ký với tư cách tổ chức từ thiện",
+            "sub": "Xác nhận tổ chức từ thiện của bạn"
+          }
+        }
+      }
+    },
+    "about": "Về chúng tôi",
+    "signIn": "Đăng nhập",
+    "startCampaign": "Bắt đầu chiến dịch"
+  },
+  "Banner": {
+    "title": "Gây quỹ <br/> Minh bạch <br/> với Hợp đồng <br/> Thông minh",
+    "description": "Kết nối từ thiện toàn cầu <br/> với công nghệ Blockchain.*",
+    "position": "#1 Nền tảng gây quỹ cộng đồng Blockchain",
+    "startBtn": "Bắt đầu chiến dịch",
+    "suggest": "Bắt đầu chỉ trong vài phút — Với công nghệ Blockchain minh bạch,<br/> bạn có thể dễ dàng tạo chiến dịch, chia sẻ câu chuyện ý nghĩa <br/> và kết nối mạnh mẽ với cộng đồng để lan tỏa lòng tốt đến mọi người."
+  },
+  "KeyFeature": {
+    "feature1": "Minh bạch và không có phí",
+    "feature2": "Giao dịch nhanh chóng",
+    "feature3": "Đảm bảo tính bảo mật và an toàn"
+  },
+  "Guide": {
+    "title": "Quyên góp với blockchain dễ dàng,<br/> bảo mật và minh bạch",
+    "step1": {
+      "title": "Sử dụng công cụ của chúng tôi để tạo chiến dịch quyên góp",
+      "description": "Giao diện đơn giản của chúng tôi sẽ hướng dẫn bạn thiết lập chiến dịch quyên góp, xác định mục tiêu và cập nhật bất kỳ lúc nào, tất cả đều với sự minh bạch của blockchain."
+    },
+    "step2": {
+      "title": "Tiếp cận người quyên góp bằng cách chia sẻ",
+      "description": "Chia sẻ liên kết chiến dịch của bạn và tận dụng sức mạnh của blockchain để thu hút người quyên góp, đảm bảo mỗi khoản đóng góp đều được theo dõi và minh bạch."
+    },
+    "step3": {
+      "title": "Nhận quyên góp một cách bảo mật",
+      "description": "Thêm thông tin ví của bạn hoặc mời người nhận quyên góp của bạn làm tương tự. Blockchain đảm bảo rằng mỗi khoản quyên góp được xử lý và ghi lại một cách bảo mật."
+    }
+  },
+  "Discover": {
+    "title": "Khám phá những người gây quỹ lấy cảm hứng từ những gì bạn quan tâm"
+  },
+  "FeaturedTopics": {
+    "title": "Chủ đề nổi bật"
+  },
+  "Search": {
+    "placeholder": "Tìm kiếm",
+    "title": "Tìm kiếm các tổ chức gây quỹ và phi lợi nhuận",
+    "description": "Tìm người gây quỹ theo tên, địa điểm, chức danh hoặc từ khóa của người đó",
+    "tab": {
+      "trending": "Xu hướng",
+      "nonprofits": "Tổ chức phi lợi nhuận",
+      "nearYou": "Gần bạn"
+    }
+  }
+}
