@@ -1,11 +1,10 @@
 "use client";
-import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
-import Discover from "../_components/discover/discover";
+import TopicTab from "./_components/topic-tab";
 
 const SearchPage = () => {
   const t = useTranslations("Search");
@@ -30,25 +29,7 @@ const SearchPage = () => {
           />
         </div>
       </div>
-
-      <Tabs defaultValue="trending" className="mt-8">
-        <div className="w-[400px]">
-          <TabsList className="grid grid-cols-3 ">
-            <TabsTrigger value="trending">{t("tab.trending")}</TabsTrigger>
-            <TabsTrigger value="nearYou">{t("tab.nearYou")}</TabsTrigger>
-            <TabsTrigger value="nonprofits">{t("tab.nonprofits")}</TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="trending">
-          <Discover />
-        </TabsContent>
-        <TabsContent value="nearYou">
-          <Discover />
-        </TabsContent>
-        <TabsContent value="nonprofits">
-          <Discover />
-        </TabsContent>
-      </Tabs>
+      <TopicTab />
     </div>
   );
 };

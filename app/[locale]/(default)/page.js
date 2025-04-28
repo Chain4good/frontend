@@ -1,18 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { createCampaign } from "@/lib/charityContract";
-import { Pen } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import Banner from "./_components/banner/banner";
 import Image from "next/image";
-import KeyFeature from "./_components/keyfeature/key-feature";
-import Guide from "./_components/guide/guide";
-import Discover from "./_components/discover/discover";
-import TopicCard from "@/components/topic/card/card";
-import Topic from "./_components/topic/topic";
+import { useState } from "react";
+import Banner from "../_components/banner/banner";
+import KeyFeature from "../_components/keyfeature/key-feature";
+import Guide from "../_components/guide/guide";
+import Discover from "../_components/discover/discover";
+import Topic from "../_components/topic/topic";
 
 export default function HomePage() {
   const [campaign, setCampaign] = useState({
