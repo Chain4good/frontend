@@ -1,0 +1,24 @@
+The GitHub Actions workflow has been created successfully. Here's what you need to do to make it work:
+
+1. Add the following secrets to your GitHub repository (Settings -> Secrets and variables -> Actions):
+•  DOCKER_USERNAME: Your Docker Hub username
+•  DOCKER_PASSWORD: Your Docker Hub access token
+•  SSH_PRIVATE_KEY: Your SSH private key for VPS access
+•  SSH_HOST: Your VPS IP address or domain
+•  SSH_USERNAME: Your VPS SSH username
+2. Ensure you have Docker installed on your VPS
+3. Make sure you have a valid Dockerfile in your project root directory. Would you like me to check if there's a Dockerfile or help you create one?
+
+The workflow will:
+•  Build and tag your Docker image
+•  Push it to Docker Hub
+•  SSH into your VPS
+•  Pull the new image
+•  Stop and remove the old container (if exists)
+•  Start a new container with the latest image
+•  Clean up old images
+
+Would you like me to:
+1. Check if a Dockerfile exists?
+2. Help you create a Dockerfile?
+3. Make any adjustments to the workflow?

@@ -189,7 +189,7 @@ const Header = () => {
           <Button variant="nav" className="flex gap-1">
             <span>{t("about")}</span>
           </Button>
-          <Button variant="nav" className="flex gap-1">
+          <Button variant="nav" className="flex gap-1" onClick={() => handleNaivigation("/sign-up")}>
             <span>{t("signIn")}</span>
           </Button>
           <Button className="font-semibold rounded-full">
