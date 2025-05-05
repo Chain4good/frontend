@@ -35,7 +35,7 @@ const SignInPage = () => {
       </div>
       <div className="w-full flex flex-col items-center">
         <div className="text-xl font-semibold">Welcome</div>
-        <p>Sign in to GoFundMe or sign up to continue.</p>
+        <p>Đăng nhập vào Chain4Good hoặc đăng ký để tiếp tục.</p>
       </div>
       <div className="space-y-2">
         <Button variant={"outline"} className="w-full">

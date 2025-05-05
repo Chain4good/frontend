@@ -5,7 +5,7 @@ import React from "react";
 const Discover = () => {
   const t = useTranslations("Discover");
   return (
-    <section className=" py-10">
+    <section className="py-10">
       <h2
         className="font-semibold mb-10 text-3xl"
         dangerouslySetInnerHTML={{ __html: t("title") }}

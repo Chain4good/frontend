@@ -44,7 +44,9 @@ export default function HomePage() {
       </session>
       <KeyFeature />
       <Guide />
-      <Discover />
+      <div className="container">
+        <Discover />
+      </div>
       <Topic />
     </main>
   );
