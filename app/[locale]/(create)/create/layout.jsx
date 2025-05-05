@@ -42,7 +42,8 @@ const Layout = ({ children }) => {
                 className="text-md"
                 onClick={prevStep}
               >
-                <ChevronLeft /> Quay lại
+                <ChevronLeft />
+                Quay lại
               </Button>
             </Link>
           )}
