@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Space_Grotesk } from "next/font/google";
 import "../globals.css";
 import "../index.css";
+import { Toaster } from "sonner";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default async function LocaleLayout({ children, params: { locale } }) {
       <body className={spaceGrotesk.className}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
+          <Toaster position="top-center" />
         </NextIntlClientProvider>
       </body>
     </html>
