@@ -1,0 +1,79 @@
+.ck.ck-editor {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px;
+}
+
+.ck.ck-toolbar {
+  border: none !important;
+  overflow: hidden;
+}
+
+.ck-sticky-panel__content {
+  border: none !important;
+}
+
+.ck.ck-editor__main {
+  padding: 0 16px;
+}
+
+.ck.ck-editor__editable {
+  border: none !important;
+  background: #ffffff !important;
+  min-height: 300px !important;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+}
+
+.ck.ck-editor__editable:focus {
+  box-shadow: none !important;
+}
+
+.ck.ck-toolbar .ck-toolbar__items .ck-button {
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+  margin: 2px !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s ease;
+}
+
+.ck.ck-toolbar .ck-toolbar__items .ck-button:hover {
+  background: #f3f4f6 !important;
+  border-color: #e5e7eb !important;
+}
+
+.ck.ck-toolbar .ck-toolbar__items .ck-button.ck-on {
+  background: #e5e7eb !important;
+  border-color: #d1d5db !important;
+}
+
+.ck.ck-dropdown .ck-dropdown__panel {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ck.ck-dropdown.ck-heading-dropdown .ck-dropdown__button .ck-button__label {
+  width: 100px;
+}
+
+.ck-content h1 {
+  font-size: 2em !important;
+  margin-bottom: 0.5em !important;
+}
+
+.ck-content h2 {
+  font-size: 1.5em !important;
+  margin-bottom: 0.4em !important;
+}
+
+.ck-content p {
+  margin-bottom: 1em !important;
+}
+
+.ck-content blockquote {
+  font-style: italic !important;
+  margin-left: 2em !important;
+  padding-left: 1em !important;
+  border-left: 4px solid #e5e7eb !important;
+}

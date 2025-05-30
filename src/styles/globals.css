@@ -1,0 +1,17 @@
+/* Add these styles for the circular progress */
+circle {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.text-primary {
+  stroke: hsl(var(--primary));
+}
+
+.text-muted {
+  stroke: hsl(var(--muted));
+  opacity: 0.2;
+}
+:root {
+  --primary-light: rgba(var(--primary-rgb), 0.1);
+  --primary-dark: rgba(var(--primary-rgb), 0.3);
+}
