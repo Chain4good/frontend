@@ -35,4 +35,8 @@ jobs:
             docker pull ${{secrets.DOCKER_USERNAME}}/charity-client:latest && \
             docker stop app-container || true && \
             docker rm app-container || true && \
-            docker run -d --name app-container -p 80:80 ${{secrets.DOCKER_USERNAME}}/charity-client:latest'
+              docker run -d \
+              --name app-container \
+              -p 80:80 \
+              -e VITE_APP_BACKEND_URL=${{ secrets.BACKEND_URL }} \
+              ${{secrets.DOCKER_USERNAME}}/charity-client:latest'
