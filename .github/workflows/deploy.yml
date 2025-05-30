@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - main # or your default branch
+      - main
 
 jobs:
   deploy:
@@ -27,12 +27,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: your-dockerhub-username/your-app-name:latest
+          tags: ${{secrets.DOCKER_USERNAME}}/charity-client:latest
 
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} '\
-            docker pull your-dockerhub-username/your-app-name:latest && \
+            docker pull ${{secrets.DOCKER_USERNAME}}/charity-client:latest && \
             docker stop app-container || true && \
             docker rm app-container || true && \
-            docker run -d --name app-container -p 80:80 your-dockerhub-username/your-app-name:latest'
+            docker run -d --name app-container -p 80:80 ${{secrets.DOCKER_USERNAME}}/charity-client:latest'
