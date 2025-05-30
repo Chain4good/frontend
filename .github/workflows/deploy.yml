@@ -31,7 +31,7 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} '\
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '\
             docker pull ${{secrets.DOCKER_USERNAME}}/charity-client:latest && \
             docker stop app-container || true && \
             docker rm app-container || true && \
