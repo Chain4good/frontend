@@ -150,7 +150,7 @@ const Search = () => {
               </div>
             )}
             {searchResult?.data?.length > 0 && (
-              <div className="max-w-7xl mx-auto">
+              <div className="md:max-w-7xl md:p-0 p-4 mx-auto">
                 <p className="font-semibold text-[20px] mb-6 leading-6">
                   {" "}
                   {searchResult?.meta?.total} kết quả tìm kiếm cho "{searchTerm}
