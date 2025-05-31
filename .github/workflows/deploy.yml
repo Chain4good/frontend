@@ -37,6 +37,6 @@ jobs:
             docker rm app-container || true && \
               docker run -d \
               --name app-container \
-              -p 80:80 \
+              -p 5173:5173 \
               -e VITE_APP_BACKEND_URL=${{ secrets.BACKEND_URL }} \
               ${{secrets.DOCKER_USERNAME}}/charity-client:latest'
