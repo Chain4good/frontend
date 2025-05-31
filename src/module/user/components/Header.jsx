@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { HeartHandshake, Menu, Search } from "lucide-react";
+import { HeartHandshake, LogIn, Menu, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -55,22 +55,12 @@ const Header = () => {
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-72">
-        <div className="flex flex-col gap-4 mt-4">
-          {/* MetaMask and Auth Buttons for Mobile */}
+      <SheetContent side="left" className="w-72 flex flex-col justify-between">
+        <div className="flex flex-col  gap-4 mt-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <MetaMaskAccount />
             </div>
-            {!user && (
-              <Button
-                variant="nav"
-                className="flex gap-1 w-full justify-start"
-                onClick={() => handleNaivigation("/sign-in")}
-              >
-                <span>Đăng nhập</span>
-              </Button>
-            )}
             <Button
               className="w-full justify-start font-semibold"
               variant={""}
@@ -109,6 +99,18 @@ const Header = () => {
             </div>
           </div>
         </div>
+        <div>
+          {!user && (
+            <Button
+              variant="outline"
+              className="flex gap-1 w-full justify-start"
+              onClick={() => handleNaivigation("/sign-in")}
+            >
+              <LogIn />
+              <span>Đăng nhập</span>
+            </Button>
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   );
@@ -123,7 +125,6 @@ const Header = () => {
         }`}
     >
       <div className="flex items-center container mx-auto px-4">
-        {/* Left section */}
         <div className="flex-1 flex gap-2 items-center">
           <MobileNav />
           <div className="hidden md:flex gap-2">
@@ -158,25 +159,6 @@ const Header = () => {
                           href={"/discover"}
                           title={"Danh mục"}
                           sub={"Duyệt các chiến dịch theo danh mục"}
-                        />
-                        <NavLink
-                          href={"/category"}
-                          title={"Hỗ trợ khẩn cấp"}
-                          sub={
-                            "Quyên góp cho các tổ chức cứu trợ đã được xác minh"
-                          }
-                        />
-                        <NavLink
-                          href={"/category"}
-                          title={"Quỹ tác động xã hội"}
-                          sub={"Hỗ trợ trực tiếp cho các nhu cầu cấp thiết"}
-                        />
-                        <NavLink
-                          href={"/category"}
-                          title={"Không gian ủng hộ"}
-                          sub={
-                            "Nguồn cảm hứng, câu hỏi thường gặp và nơi để quyên góp"
-                          }
                         />
                       </div>
                     </div>
@@ -216,33 +198,6 @@ const Header = () => {
                             href={"/category"}
                             title={"Gây quỹ theo nhóm"}
                             sub={"Gây quỹ cùng với một nhóm"}
-                          />
-                          <NavLink
-                            href={"/category"}
-                            title={"Blog về gây quỹ"}
-                            sub={"Tài nguyên, mẹo và nhiều nội dung khác"}
-                          />
-                          <NavLink
-                            href={"/category"}
-                            title={"Mẹo gây quỹ"}
-                            sub={"Hướng dẫn mẹo gây quỹ toàn diện"}
-                          />
-                          <NavLink
-                            href={"/category"}
-                            title={"Ý tưởng gây quỹ"}
-                            sub={
-                              "Ý tưởng truyền cảm hứng cho sự sáng tạo của bạn"
-                            }
-                          />
-                          <NavLink
-                            href={"/category"}
-                            title={"Blog về gây quỹ"}
-                            sub={"Gây quỹ cho một tổ chức từ thiện"}
-                          />
-                          <NavLink
-                            href={"/category"}
-                            title={"Đăng ký với tư cách tổ chức từ thiện"}
-                            sub={"Xác nhận tổ chức từ thiện của bạn"}
                           />
                         </div>
                       </div>

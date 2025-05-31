@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Wallet } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -32,9 +33,10 @@ const MetaMaskAccount = () => {
   return (
     <Button
       variant={account ? "secondary" : "default"}
-      className="w-32 rounded-full text-xs font-medium transition-all"
+      className="w-full md:w-32 md:rounded-full text-xs font-medium transition-all"
       onClick={getCurrentAccount}
     >
+      <Wallet className="mr-2" />
       {account ? shortenAddress(account) : "Kết nối ví"}
     </Button>
   );

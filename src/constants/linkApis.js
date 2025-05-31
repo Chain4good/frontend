@@ -69,3 +69,7 @@ export const UserV1 = {
   UPDATE_USER: "/users",
   DELETE_USER: "/users",
 };
+
+export const AiV1 = {
+  AI_ANALYZE_CAMPAIGN: "/ai/analyze-campaign",
+};

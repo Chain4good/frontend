@@ -10,7 +10,7 @@ export default {
         center: true,
         padding: "2rem",
         screens: {
-          "2xl": "1200px",
+          "2xl": "1300px",
         },
       },
       borderRadius: {
@@ -175,5 +175,6 @@ export default {
       },
     },
   },
+  // eslint-disable-next-line no-undef
   plugins: [require("tailwindcss-animate")],
 };

@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import EditProfileForm from "../components/EditProfileForm";
 
 const Profile = () => {
   const { user, setUser } = useUserStore();
@@ -33,6 +34,19 @@ const Profile = () => {
     },
     onError: (error) => {
       toast.error("Có lỗi xảy ra khi cập nhật!");
+    },
+  });
+
+  // Add new mutation for updating profile
+  const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
+    mutationFn: (data) => updateUser(user.id, data),
+    onSuccess: (data) => {
+      setUser(data);
+      queryClient.invalidateQueries(["user"]);
+      toast.success("Cập nhật thông tin thành công!");
+    },
+    onError: (error) => {
+      toast.error("Có lỗi xảy ra khi cập nhật thông tin!");
     },
   });
 
@@ -89,6 +103,11 @@ const Profile = () => {
     } finally {
       setLoading((prev) => ({ ...prev, avatar: false }));
     }
+  };
+
+  // Handle profile update
+  const handleUpdateProfile = (data) => {
+    updateProfile(data);
   };
 
   const renderField = (icon, label, value) => {
@@ -188,10 +207,11 @@ const Profile = () => {
                   {user?.roleId === 2 ? "User" : "Admin"}
                 </Badge>
               </div>
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
+              <EditProfileForm
+                user={user}
+                onSubmit={handleUpdateProfile}
+                isLoading={isUpdatingProfile}
+              />
             </CardHeader>
 
             <CardContent>

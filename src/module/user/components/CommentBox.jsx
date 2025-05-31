@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { formatDistance } from "date-fns";
+import { vi } from "date-fns/locale"; // Add this import
 import { Heart, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageSquare } from "lucide-react";
@@ -42,7 +43,7 @@ const Comment = ({
           <div className="bg-muted p-4 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <span className="font-semibold">{comment.user.name}</span>
+                <span className="font-semibold mr-2">{comment.user.name}</span>
                 {comment.parentId && (
                   <span className="text-xs text-muted-foreground mx-2">
                     trả lời
@@ -51,6 +52,7 @@ const Comment = ({
                 <span className="text-xs text-muted-foreground">
                   {formatDistance(new Date(comment.createdAt), new Date(), {
                     addSuffix: true,
+                    locale: vi,
                   })}
                 </span>
               </div>
