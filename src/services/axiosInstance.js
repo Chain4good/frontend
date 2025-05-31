@@ -2,7 +2,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_APP_BACKEND_URL || "http://185.200.65.252:3000",
+  baseURL:
+    import.meta.env.VITE_APP_BACKEND_URL || "https://api.chain4good.io.vn",
   timeout: 120000,
   withCredentials: true,
 });
