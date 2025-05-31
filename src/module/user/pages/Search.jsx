@@ -7,12 +7,19 @@ import { useQuery } from "@tanstack/react-query";
 import { getCampaigns } from "@/services/campaignService";
 import ListCampaign from "@/components/ListCampaign";
 import { Skeleton } from "@/components/ui/skeleton"; // Add this import
+import FilterCampaign from "@/components/FilterCampaign";
 
 const Search = () => {
   const [filters, setFilters] = useState({
     page: 1,
     limit: 10,
     search: "",
+    fundraiseTypeId: undefined,
+    categoryId: undefined,
+    status: undefined,
+    countryId: undefined,
+    sort: undefined,
+    sortBy: undefined,
   });
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -65,14 +72,13 @@ const Search = () => {
   };
 
   const { data: searchResult, isFetching } = useQuery({
-    queryKey: ["search", filters.search],
+    queryKey: ["search", filters],
     queryFn: () => getCampaigns(filters),
-    enabled: !!filters.search,
   });
 
   const renderLoadingState = () => {
     return (
-      <div className="container max-w-6xl mx-auto">
+      <div className="md:max-w-7xl md:p-0 p-4 mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((index) => (
             <div
@@ -100,6 +106,22 @@ const Search = () => {
         </div>
       </div>
     );
+  };
+
+  const onClearFilters = () => {
+    setSearchTerm("");
+    setFilters((prev) => ({
+      ...prev,
+      page: 1,
+      limit: 10,
+      search: undefined,
+      fundraiseTypeId: undefined,
+      categoryId: undefined,
+      status: undefined,
+      countryId: undefined,
+      sort: undefined,
+      sortBy: undefined,
+    }));
   };
 
   return (
@@ -137,30 +159,39 @@ const Search = () => {
         </div>
       </div>
       <div className="mx-auto">
-        {isFetching ? (
-          renderLoadingState()
-        ) : (
-          <>
-            {searchResult?.meta?.total === 0 && (
-              <div id="search-list">{renderEmptyState()}</div>
-            )}
-            {!searchTerm && (
+        <div className="md:max-w-7xl md:p-0 p-4 mx-auto">
+          <FilterCampaign
+            filters={filters}
+            setFilters={setFilters}
+            onClearFilters={onClearFilters}
+          />
+          {isFetching ? (
+            renderLoadingState()
+          ) : (
+            <>
+              {searchResult?.meta?.total === 0 && (
+                <div id="search-list">{renderEmptyState()}</div>
+              )}
+              {/* {!searchTerm && (
               <div className="text-center py-16 text-muted-foreground">
                 Nhập từ khóa để bắt đầu tìm kiếm
               </div>
-            )}
-            {searchResult?.data?.length > 0 && (
-              <div className="md:max-w-7xl md:p-0 p-4 mx-auto">
-                <p className="font-semibold text-[20px] mb-6 leading-6">
-                  {" "}
-                  {searchResult?.meta?.total} kết quả tìm kiếm cho "{searchTerm}
-                  "
-                </p>
-                <ListCampaign campaigns={searchResult?.data} />
-              </div>
-            )}
-          </>
-        )}
+            )} */}
+              {searchResult?.data?.length > 0 && (
+                <>
+                  {searchTerm && (
+                    <p className="font-semibold text-[20px] mb-6 leading-6">
+                      {searchResult?.meta?.total} kết quả tìm kiếm cho "
+                      {searchTerm}"
+                    </p>
+                  )}
+
+                  <ListCampaign campaigns={searchResult?.data} />
+                </>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </main>
   );

@@ -48,7 +48,12 @@ export const formattedDonors = (donors) => {
 
 export const validateFile = (file) => {
   const maxSize = 100 * 1024 * 1024; // 100MB
-  const allowedImageTypes = ["image/jpeg", "image/png", "image/gif"];
+  const allowedImageTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
   const allowedVideoTypes = ["video/mp4", "video/webm", "video/ogg"];
 
   if (file.size > maxSize) {

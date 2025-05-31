@@ -1,5 +1,6 @@
 const ProgressBar = ({ value, max }) => {
   const percentage = (value / max) * 100;
+  console.log(percentage);
 
   return (
     <div className="w-full">
@@ -9,9 +10,16 @@ const ProgressBar = ({ value, max }) => {
           style={{ width: `${percentage}%` }}
         />
       </div>
-      <p className="mt-1 text-black font-semibold">
-        €{value.toLocaleString()} raised
-      </p>
+      <div className="flex justify-between mt-1">
+        <p className=" text-black font-semibold">
+          {percentage === 100
+            ? "Đã hoàn thành"
+            : `${value.toLocaleString()} ETH`}
+        </p>
+        <p>
+          <span className="text-gray-500">{max.toLocaleString()} ETH</span>
+        </p>
+      </div>
     </div>
   );
 };

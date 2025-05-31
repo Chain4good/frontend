@@ -4,13 +4,14 @@ import ProgressBar from "../ProgressBar/ProgressBar";
 import { Badge } from "../ui/badge";
 import { CampaignStatus } from "@/constants/status";
 import { CheckCircle } from "lucide-react";
+import { truncate } from "lodash";
 const Card = ({ campaign }) => {
   const renderMedia = () => {
     if (campaign?.cover?.type === "VIDEO") {
       return (
         <video
           src={campaign?.cover?.url}
-          className="w-full h-48 object-cover"
+          className="w-full h-56 object-cover"
           controls
           muted
         >
@@ -24,7 +25,7 @@ const Card = ({ campaign }) => {
       <img
         src={campaign?.cover?.url}
         alt={campaign?.title}
-        className="w-full h-48 object-cover"
+        className="w-full h-56 object-cover"
       />
     );
   };
@@ -33,7 +34,7 @@ const Card = ({ campaign }) => {
       <div className="relative rounded-lg flex-1 overflow-hidden">
         {renderMedia()}
         <span className="absolute left-2 bottom-2 px-4 py-1 bg-slate-900 bg-opacity-80 text-white rounded-full">
-          1k donations
+          {campaign?._count?.donations} Đóng góp
         </span>
         <Badge
           variant={campaign?.status === "ACTIVE" ? "secondary" : "default"}
@@ -43,11 +44,17 @@ const Card = ({ campaign }) => {
           {CampaignStatus[campaign?.status]}
         </Badge>
       </div>
-      <div>
-        <h3 className="font-semibold leading-none p-2 mb-1">
-          {campaign?.title}
+      <div className="p-1">
+        <h3 className="font-semibold leading-none py-2" title={campaign?.title}>
+          {truncate(campaign?.title, { length: 40 })}
         </h3>
-        <ProgressBar value={123000} max={200000} />
+        <p className="text-sm text-muted-foreground  mb-2">
+          Tạo bởi {campaign?.user?.name}
+        </p>
+        <ProgressBar
+          value={Number(campaign?.totalDonated)}
+          max={Number(campaign?.ethGoal)}
+        />
       </div>
     </Link>
   );

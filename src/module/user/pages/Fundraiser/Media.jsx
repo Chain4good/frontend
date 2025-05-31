@@ -1,15 +1,14 @@
-import React, { useState } from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ImagePlus, X, Loader2, AlertCircle } from "lucide-react"; // Thêm Loader2
-import { useFormContext } from "react-hook-form";
-import useCampaign from "@/hooks/useCampaign";
-import { uploadFile } from "@/services/uploadService";
-import { createCover } from "@/services/coverService";
-import { validateFile } from "@/lib/utils";
-import { useLocation } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import useCampaign from "@/hooks/useCampaign";
+import { validateFile } from "@/lib/utils";
+import { createCover } from "@/services/coverService";
+import { uploadFile } from "@/services/uploadService";
+import { AlertCircle, ImagePlus, Loader2, X } from "lucide-react"; // Thêm Loader2
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
 
 const Media = () => {
   const [preview, setPreview] = useState({
@@ -20,7 +19,7 @@ const Media = () => {
     cover: false,
     images: false,
   });
-  const { newCampaign, changeCampaignValue } = useCampaign();
+  const { changeCampaignValue } = useCampaign();
   const location = useLocation();
   const error = location.state?.error;
 

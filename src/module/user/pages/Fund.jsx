@@ -1,3 +1,4 @@
+import FundSkeleton from "@/components/FundSkeleton";
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -8,13 +9,17 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import VideoPlayer from "@/components/VideoPlayer/VideoPlayer";
 import { CampaignStatus } from "@/constants/status";
 import { useCharityDonation } from "@/hooks/useCharityDonation";
 import { formatCampaign, formattedDonors } from "@/lib/utils";
 import { getCampaignById } from "@/services/campaignService";
+import {
+  createComment,
+  getCommentsByCampaign,
+} from "@/services/commentService";
+import { analyzeCampaign } from "@/services/aiService";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle } from "lucide-react";
@@ -23,15 +28,16 @@ import { useParams } from "react-router-dom";
 import CommentBox from "../components/CommentBox";
 import FundBox from "../components/FundBox";
 import ShareModal from "../components/ShareModal";
-import { getCommentsByCampaign } from "@/services/commentService";
-import { createComment } from "@/services/commentService";
-import FundSkeleton from "@/components/FundSkeleton";
+import AnalysisResult from "@/components/AnalysisResult";
+import AnalyzeButton from "@/components/AnalyzeButton";
 
 const Fund = () => {
   const { id } = useParams();
   const { getCampaign, getDonors, listenToFundsWithdrawn } =
     useCharityDonation();
+  const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState(null);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   const {
     data: campaign,
@@ -118,8 +124,6 @@ const Fund = () => {
     enabled: !!campaign?.id,
   });
 
-  const queryClient = useQueryClient();
-
   const { mutate: addComment, isPending: isAddingComment } = useMutation({
     mutationFn: createComment,
     onSuccess: () => {
@@ -131,6 +135,17 @@ const Fund = () => {
     mutationFn: createComment,
     onSuccess: () => {
       queryClient.invalidateQueries(["comments", campaign?.id]);
+    },
+  });
+
+  const { mutate: analyzeContent, isPending: isAnalyzing } = useMutation({
+    mutationFn: analyzeCampaign,
+    onSuccess: (data) => {
+      setAnalysisResult(data);
+      console.log("Analysis complete:", data);
+    },
+    onError: (error) => {
+      console.error("Analysis failed:", error);
     },
   });
 
@@ -146,6 +161,15 @@ const Fund = () => {
       content,
       campaignId: campaign.id,
       parentId,
+    });
+  };
+
+  const handleAnalyzeCampaign = () => {
+    if (!campaign) return;
+
+    analyzeContent({
+      title: campaign.title,
+      description: campaign.description,
     });
   };
 
@@ -185,6 +209,20 @@ const Fund = () => {
                     {onChainCampaign?.creator}
                   </p>
                 </div>
+              </div>
+              <Separator className="my-6 md:my-8" />
+
+              <div className="mb-6">
+                <AnalyzeButton
+                  onClick={handleAnalyzeCampaign}
+                  isAnalyzing={isAnalyzing}
+                />
+                {(analysisResult || isAnalyzing) && (
+                  <AnalysisResult
+                    analysis={analysisResult}
+                    isLoading={isAnalyzing}
+                  />
+                )}
               </div>
               <Separator />
               <ReadMore
