@@ -165,6 +165,11 @@ export default {
             )}px) translateX(${randomizePosition(-20, 20)}px)`,
           },
         },
+        "bell-shake": {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "20%, 60%": { transform: "rotate(8deg)" },
+          "40%, 80%": { transform: "rotate(-8deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -172,6 +177,7 @@ export default {
         gentleFloat1: "gentleFloat 7s ease-in-out infinite",
         gentleFloat2: "gentleFloat2 7s ease-in-out infinite",
         gentleFloat3: "gentleFloat2 7s ease-in-out infinite",
+        "bell-shake": "bell-shake 1s infinite",
       },
     },
   },

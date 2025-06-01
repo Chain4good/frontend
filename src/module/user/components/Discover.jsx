@@ -1,7 +1,18 @@
 import Card from "@/components/Card/Card";
-import React from "react";
+import { getCampaigns } from "@/services/campaignService";
+import { useQuery } from "@tanstack/react-query";
 
 const Discover = () => {
+  const { data: campaigns, isLoading } = useQuery({
+    queryKey: ["campaigns"],
+    queryFn: () =>
+      getCampaigns({
+        page: 1,
+        limit: 5,
+      }),
+  });
+  console.log("campaigns", campaigns);
+
   return (
     <section className="py-10">
       <h2
@@ -11,18 +22,35 @@ const Discover = () => {
             "Khám phá những người gây quỹ lấy cảm hứng từ những gì bạn quan tâm",
         }}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-        {/* Featured card - full width on mobile */}
-        <Card className="col-span-1 md:col-span-1" />
 
-        {/* Grid of smaller cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+        {/* Featured campaign */}
+        {campaigns?.data?.[0] && (
+          <Card
+            size="lg"
+            titleMaxLength={50}
+            className="col-span-1 md:col-span-1"
+            campaign={campaigns.data[0]}
+          />
+        )}
+
+        {/* Grid of other campaigns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
-          <Card />
-          <Card />
-          <Card />
-          <Card />
+          {campaigns?.data?.slice(1, 5).map((campaign) => (
+            <Card key={campaign.id} campaign={campaign} titleMaxLength={30} />
+          ))}
         </div>
       </div>
+
+      {/* {isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-gray-200 h-48 rounded-lg" />
+            </div>
+          ))}
+        </div>
+      )} */}
     </section>
   );
 };

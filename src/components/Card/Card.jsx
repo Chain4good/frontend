@@ -5,13 +5,15 @@ import { Badge } from "../ui/badge";
 import { CampaignStatus } from "@/constants/status";
 import { CheckCircle } from "lucide-react";
 import { truncate } from "lodash";
-const Card = ({ campaign }) => {
+const Card = ({ campaign, size, titleMaxLength }) => {
   const renderMedia = () => {
     if (campaign?.cover?.type === "VIDEO") {
       return (
         <video
           src={campaign?.cover?.url}
-          className="w-full h-56 object-cover"
+          className={`w-full h-56 object-cover ${
+            size === "lg" ? "h-full" : "h-56 "
+          }`}
           controls
           muted
         >
@@ -25,7 +27,9 @@ const Card = ({ campaign }) => {
       <img
         src={campaign?.cover?.url}
         alt={campaign?.title}
-        className="w-full h-56 object-cover"
+        className={`w-full h-56 object-cover ${
+          size === "lg" ? "h-full" : "h-56 "
+        }`}
       />
     );
   };
@@ -46,7 +50,7 @@ const Card = ({ campaign }) => {
       </div>
       <div className="p-1">
         <h3 className="font-semibold leading-none py-2" title={campaign?.title}>
-          {truncate(campaign?.title, { length: 40 })}
+          {truncate(campaign?.title, { length: titleMaxLength ?? 40 })}
         </h3>
         <p className="text-sm text-muted-foreground  mb-2">
           Tạo bởi {campaign?.user?.name}

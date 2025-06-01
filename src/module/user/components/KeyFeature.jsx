@@ -5,7 +5,7 @@ const KeyFeature = () => {
   const features = [
     {
       icon: <Origami className="w-5 h-5" />,
-      text: "Minh bạch và không có phí",
+      text: "Miễn phí",
     },
     {
       icon: <Zap className="w-5 h-5" />,

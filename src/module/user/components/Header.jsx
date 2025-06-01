@@ -24,10 +24,12 @@ import useUserStore from "@/hooks/useUserStore";
 import { LogOut, Settings, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import MetaMaskAccount from "./MetaMaskAccount";
+import { useNotification } from "@/components/NotificationProvider";
+import NotificationList from "@/components/NotificationList";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-
+  const { unreadCount } = useNotification();
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -239,6 +241,9 @@ const Header = () => {
           >
             <span>Bắt đầu chiến dịch</span>
           </Button>
+          <div>
+            <NotificationList />
+          </div>
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger>

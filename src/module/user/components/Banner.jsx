@@ -11,13 +11,15 @@ const Banner = () => {
             {"#1 Nền tảng gây quỹ cộng đồng Blockchain"}
           </p>
           <h1
-            className="md:text-7xl text-4xl  text-center capitalize leading-[48px] font-semibold md:leading-[90px]"
+            className="md:text-7xl text-4xl  text-center capitalize leading-[48px] font-semibold tracking-tight md:leading-[90px]"
             dangerouslySetInnerHTML={{
               __html:
                 "Gây quỹ <br/> Minh bạch <br/> với Hợp đồng <br/> Thông minh",
             }}
           />
-          <Button className="font-semibold">{"Bắt đầu chiến dịch"}</Button>
+          <Button size="xl" className="font-semibold text-lg mt-2 rounded-2xl">
+            {"Bắt đầu chiến dịch"}
+          </Button>
         </div>
         <div className="flex-1"></div>
       </div>

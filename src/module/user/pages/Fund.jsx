@@ -30,6 +30,7 @@ import FundBox from "../components/FundBox";
 import ShareModal from "../components/ShareModal";
 import AnalysisResult from "@/components/AnalysisResult";
 import AnalyzeButton from "@/components/AnalyzeButton";
+import { Helmet } from "react-helmet-async";
 
 const Fund = () => {
   const { id } = useParams();
@@ -174,114 +175,151 @@ const Fund = () => {
   };
 
   return (
-    <div className="container py-6 md:py-10 px-4 md:px-6">
-      {isLoading && <FundSkeleton />}
-      {error && <div>Error: {error.message}</div>}
-      {campaign && (
-        <>
-          <h1 className="text-2xl md:text-4xl font-semibold pb-4 md:pb-6">
-            {campaign.title}
-          </h1>
+    <>
+      <Helmet>
+        <title>
+          {campaign?.title
+            ? `${campaign.title} | Chain4Good`
+            : "Chiến dịch | Chain4Good"}
+        </title>
+        <meta
+          name="description"
+          content={
+            campaign?.description?.slice(0, 155) ||
+            "Tham gia đóng góp vào chiến dịch từ thiện trên Chain4Good. Mọi giao dịch đều minh bạch và được lưu trữ trên blockchain."
+          }
+        />
+        <meta
+          property="og:title"
+          content={
+            campaign?.title
+              ? `${campaign.title} | Chain4Good`
+              : "Chiến dịch | Chain4Good"
+          }
+        />
+        <meta
+          property="og:description"
+          content={
+            campaign?.description?.slice(0, 155) ||
+            "Tham gia đóng góp vào chiến dịch từ thiện trên Chain4Good. Mọi giao dịch đều minh bạch và được lưu trữ trên blockchain."
+          }
+        />
+        <meta property="og:image" content={campaign?.cover?.url || ""} />
+        <meta property="og:type" content="website" />
+      </Helmet>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 ">
-            <div className="col-span-1 md:col-span-2">
-              <div className="relative">
-                {renderMedia(campaign.cover)}
-                {campaign.status === "FINISHED" && (
-                  <Badge className="absolute top-4 left-4" variant={"default"}>
-                    <CheckCircle className="mr-2 h-3 w-3 md:h-4 md:w-4" />
-                    {CampaignStatus[campaign.status]}
-                  </Badge>
-                )}
-              </div>
+      <div className="container py-6 md:py-10 px-4 md:px-6">
+        {isLoading && <FundSkeleton />}
+        {error && <div>Error: {error.message}</div>}
+        {campaign && (
+          <>
+            <h1 className="text-2xl md:text-4xl font-semibold pb-4 md:pb-6">
+              {campaign.title}
+            </h1>
 
-              <div className="flex gap-3 md:gap-4 items-center mt-4 pb-4">
-                <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                  <AvatarImage src={campaign?.user?.image} />
-                  <AvatarFallback>CG</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="text-sm md:text-base">
-                    <strong>{campaign?.user?.name}</strong> đang tổ chức buổi
-                    gây quỹ
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 ">
+              <div className="col-span-1 md:col-span-2">
+                <div className="relative">
+                  {renderMedia(campaign.cover)}
+                  {campaign.status === "FINISHED" && (
+                    <Badge
+                      className="absolute top-4 left-4"
+                      variant={"default"}
+                    >
+                      <CheckCircle className="mr-2 h-3 w-3 md:h-4 md:w-4" />
+                      {CampaignStatus[campaign.status]}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="flex gap-3 md:gap-4 items-center mt-4 pb-4">
+                  <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                    <AvatarImage src={campaign?.user?.image} />
+                    <AvatarFallback>CG</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="text-sm md:text-base">
+                      <strong>{campaign?.user?.name}</strong> đang tổ chức buổi
+                      gây quỹ
+                    </div>
+                    <p className="text-muted-foreground text-xs md:text-sm">
+                      {onChainCampaign?.creator}
+                    </p>
                   </div>
-                  <p className="text-muted-foreground text-xs md:text-sm">
-                    {onChainCampaign?.creator}
-                  </p>
+                </div>
+                <Separator className="my-6 md:my-8" />
+
+                <div className="mb-6">
+                  <AnalyzeButton
+                    onClick={handleAnalyzeCampaign}
+                    isAnalyzing={isAnalyzing}
+                  />
+                  {(analysisResult || isAnalyzing) && (
+                    <AnalysisResult
+                      analysis={analysisResult}
+                      isLoading={isAnalyzing}
+                    />
+                  )}
+                </div>
+                <Separator />
+                <ReadMore
+                  className="text-base md:text-lg mt-4 md:mt-6"
+                  text={campaign?.description}
+                />
+                <Separator className="my-6 md:my-8" />
+                <div className="mt-4 md:mt-6">
+                  <Carousel className="w-full">
+                    <CarouselContent className="ml-2 md:ml-4">
+                      {campaign?.images?.map((image, index) => (
+                        <CarouselItem
+                          key={index}
+                          className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                        >
+                          <div
+                            className="rounded-md aspect-square overflow-hidden cursor-pointer"
+                            onClick={() => setSelectedImage(image.url)}
+                          >
+                            <img
+                              src={image.url}
+                              alt=""
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="hidden md:flex" />
+                    <CarouselNext className="hidden md:flex" />
+                  </Carousel>
+                </div>
+                <Separator className="my-6 md:my-8" />
+                <div className="mt-6 md:mt-8">
+                  <h2 className="text-xl md:text-2xl font-semibold mb-4">
+                    Bình luận
+                  </h2>
+                  <CommentBox
+                    comments={comments}
+                    onAddComment={handleAddComment}
+                    onReply={handleReply}
+                    isLoading={isCommentsLoading}
+                    isSubmitting={isAddingComment || isReplying}
+                  />
                 </div>
               </div>
-              <Separator className="my-6 md:my-8" />
-
-              <div className="mb-6">
-                <AnalyzeButton
-                  onClick={handleAnalyzeCampaign}
-                  isAnalyzing={isAnalyzing}
-                />
-                {(analysisResult || isAnalyzing) && (
-                  <AnalysisResult
-                    analysis={analysisResult}
-                    isLoading={isAnalyzing}
-                  />
-                )}
-              </div>
-              <Separator />
-              <ReadMore
-                className="text-base md:text-lg mt-4 md:mt-6"
-                text={campaign?.description}
-              />
-              <Separator className="my-6 md:my-8" />
-              <div className="mt-4 md:mt-6">
-                <Carousel className="w-full">
-                  <CarouselContent className="ml-2 md:ml-4">
-                    {campaign?.images?.map((image, index) => (
-                      <CarouselItem
-                        key={index}
-                        className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
-                      >
-                        <div
-                          className="rounded-md aspect-square overflow-hidden cursor-pointer"
-                          onClick={() => setSelectedImage(image.url)}
-                        >
-                          <img
-                            src={image.url}
-                            alt=""
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="hidden md:flex" />
-                  <CarouselNext className="hidden md:flex" />
-                </Carousel>
-              </div>
-              <Separator className="my-6 md:my-8" />
-              <div className="mt-6 md:mt-8">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4">
-                  Bình luận
-                </h2>
-                <CommentBox
-                  comments={comments}
-                  onAddComment={handleAddComment}
-                  onReply={handleReply}
-                  isLoading={isCommentsLoading}
-                  isSubmitting={isAddingComment || isReplying}
+              <div className="col-span-1 order-first md:order-none mb-4 md:mb-0">
+                <FundBox
+                  donors={donors}
+                  onChainCampaign={onChainCampaign}
+                  campaign={campaign}
+                  isDonorsLoading={isDonorsLoading}
                 />
               </div>
             </div>
-            <div className="col-span-1 order-first md:order-none mb-4 md:mb-0">
-              <FundBox
-                donors={donors}
-                onChainCampaign={onChainCampaign}
-                campaign={campaign}
-                isDonorsLoading={isDonorsLoading}
-              />
-            </div>
-          </div>
-          <ShareModal />
-        </>
-      )}
-    </div>
+            <ShareModal />
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

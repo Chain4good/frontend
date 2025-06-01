@@ -6,8 +6,9 @@ import debounce from "lodash/debounce";
 import { useQuery } from "@tanstack/react-query";
 import { getCampaigns } from "@/services/campaignService";
 import ListCampaign from "@/components/ListCampaign";
-import { Skeleton } from "@/components/ui/skeleton"; // Add this import
+import { Skeleton } from "@/components/ui/skeleton";
 import FilterCampaign from "@/components/FilterCampaign";
+import { Helmet } from "react-helmet-async";
 
 const Search = () => {
   const [filters, setFilters] = useState({
@@ -125,75 +126,102 @@ const Search = () => {
   };
 
   return (
-    <main className="min-h-screen">
-      <div className="container mx-auto pt-14">
-        <div className="max-w-3xl mx-auto text-center space-y-4 mb-12">
-          <h1 className="text-3xl font-semibold">
-            Tìm kiếm các tổ chức gây quỹ và phi lợi nhuận
-          </h1>
-          <p className="text-base text-muted-foreground">
-            Tìm người gây quỹ theo tên, địa điểm, chức danh hoặc từ khóa của
-            người đó
-          </p>
-        </div>
+    <>
+      <Helmet>
+        <title>
+          {searchTerm
+            ? `Tìm kiếm: ${searchTerm} | Chain4Good`
+            : "Tìm kiếm chiến dịch | Chain4Good"}
+        </title>
+        <meta
+          name="description"
+          content="Tìm kiếm các chiến dịch từ thiện, tổ chức gây quỹ và phi lợi nhuận trên Chain4Good. Khám phá và quyên góp cho những dự án phù hợp với bạn."
+        />
+        <meta
+          property="og:title"
+          content={
+            searchTerm
+              ? `Tìm kiếm: ${searchTerm} | Chain4Good`
+              : "Tìm kiếm chiến dịch | Chain4Good"
+          }
+        />
+        <meta
+          property="og:description"
+          content="Tìm kiếm các chiến dịch từ thiện, tổ chức gây quỹ và phi lợi nhuận trên Chain4Good. Khám phá và quyên góp cho những dự án phù hợp với bạn."
+        />
+        <meta property="og:type" content="website" />
+      </Helmet>
 
-        <div className="max-w-2xl mx-auto mb-16">
-          <div className="relative">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              value={searchTerm}
-              onChange={handleSearchChange}
-              placeholder="Tìm kiếm chiến dịch..."
-              className="h-14 pl-12 pr-24 text-lg rounded-full bg-background border-muted-foreground/20 hover:border-primary/50 focus-visible:ring-1 focus-visible:ring-primary transition-colors"
-            />
-            {searchTerm && (
-              <Button
-                onClick={handleClearSearch}
-                variant="text"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-10"
-              >
-                <Delete size={32} strokeWidth={1.25} />
-              </Button>
-            )}
+      <main className="min-h-screen">
+        <div className="container mx-auto pt-14">
+          <div className="max-w-3xl mx-auto text-center space-y-4 mb-12">
+            <h1 className="text-3xl font-semibold">
+              Tìm kiếm các tổ chức gây quỹ và phi lợi nhuận
+            </h1>
+            <p className="text-base text-muted-foreground">
+              Tìm người gây quỹ theo tên, địa điểm, chức danh hoặc từ khóa của
+              người đó
+            </p>
+          </div>
+
+          <div className="max-w-2xl mx-auto mb-16">
+            <div className="relative">
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder="Tìm kiếm chiến dịch..."
+                className="h-14 pl-12 pr-24 text-lg rounded-full bg-background border-muted-foreground/20 hover:border-primary/50 focus-visible:ring-1 focus-visible:ring-primary transition-colors"
+              />
+              {searchTerm && (
+                <Button
+                  onClick={handleClearSearch}
+                  variant="text"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-10"
+                >
+                  <Delete size={32} strokeWidth={1.25} />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-      <div className="mx-auto">
-        <div className="md:max-w-7xl md:p-0 p-4 mx-auto">
-          <FilterCampaign
-            filters={filters}
-            setFilters={setFilters}
-            onClearFilters={onClearFilters}
-          />
-          {isFetching ? (
-            renderLoadingState()
-          ) : (
-            <>
-              {searchResult?.meta?.total === 0 && (
-                <div id="search-list">{renderEmptyState()}</div>
-              )}
-              {/* {!searchTerm && (
+        <div className="mx-auto">
+          <div className="md:max-w-7xl md:p-0 p-4 mx-auto">
+            <FilterCampaign
+              filters={filters}
+              setFilters={setFilters}
+              onClearFilters={onClearFilters}
+            />
+            {isFetching ? (
+              renderLoadingState()
+            ) : (
+              <>
+                {searchResult?.meta?.total === 0 && (
+                  <div id="search-list">{renderEmptyState()}</div>
+                )}
+                {/* {!searchTerm && (
               <div className="text-center py-16 text-muted-foreground">
                 Nhập từ khóa để bắt đầu tìm kiếm
               </div>
             )} */}
-              {searchResult?.data?.length > 0 && (
-                <>
-                  {searchTerm && (
-                    <p className="font-semibold text-[20px] mb-6 leading-6">
-                      {searchResult?.meta?.total} kết quả tìm kiếm cho "
-                      {searchTerm}"
-                    </p>
-                  )}
+                {searchResult?.data?.length > 0 && (
+                  <>
+                    {searchTerm && (
+                      <p className="font-semibold text-[20px] mb-6 leading-6">
+                        {searchResult?.meta?.total} kết quả tìm kiếm cho "
+                        {searchTerm}"
+                      </p>
+                    )}
 
-                  <ListCampaign campaigns={searchResult?.data} />
-                </>
-              )}
-            </>
-          )}
+                    <ListCampaign campaigns={searchResult?.data} />
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 };
 

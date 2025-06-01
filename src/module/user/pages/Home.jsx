@@ -1,39 +1,50 @@
-import Topic from "../components/Topic";
+import { Helmet } from "react-helmet-async";
 import Banner from "../components/Banner";
+import Discover from "../components/Discover";
 import Guide from "../components/Guide";
 import KeyFeature from "../components/KeyFeature";
-import Discover from "../components/Discover";
-import CampaignList from "@/components/CampaignList/CampaignList";
-import CreateCampaign from "@/components/CreateCampaign/CreateCampaign";
+import Topic from "../components/Topic";
 
 export default function Home() {
   return (
-    <main className="">
-      <section className="relative">
-        {/* Fixed typo: session -> section */}
-        <div className="">
-          <Banner />
+    <>
+      <Helmet>
+        <title>Trang chủ | Chain4Good</title>
+        <meta
+          name="description"
+          content="Nền tảng gây quỹ từ thiện phi tập trung. Quyên góp và giúp đỡ người khác một cách minh bạch."
+        />
+        <meta property="og:title" content="Trang chủ | Chain4Good" />
+        <meta
+          property="og:description"
+          content="Nền tảng gây quỹ từ thiện phi tập trung. Quyên góp và giúp đỡ người khác một cách minh bạch."
+        />
+        <meta property="og:type" content="website" />
+      </Helmet>
+      <main className="relative min-h-screen">
+        <section className="relative w-full">
+          <div className="relative z-10">
+            <Banner />
+          </div>
+          <BehindTheBanner />
+        </section>
+        <KeyFeature />
+        <Guide />
+        <div className="container mx-auto px-4 py-8">
+          <Discover />
         </div>
-        <BehindTheBanner />
-      </section>
-      <KeyFeature />
-      <Guide />
-      <div className="container mx-auto px-4">
-        {" "}
-        {/* Added padding for mobile */}
-        <Discover />
-      </div>
-      <Topic />
-    </main>
+        <Topic />
+      </main>
+    </>
   );
 }
 
 const BehindTheBanner = () => {
   return (
     <>
-      <div className="-z-10 bl absolute flex items-center overflow-hidden justify-center top-0 left-0 right-0 bottom-0">
-        <div className=" md:size-[1300px] size-[600px] rounded-full border border-dashed border-gray-200 flex items-center justify-center">
-          <div className="size-[300px] md:size-[600px] rounded-full border border-dashed"></div>
+      <div className="absolute inset-0 -z-10 flex items-center justify-center overflow-hidden">
+        <div className="flex h-[600px] w-[600px] items-center justify-center rounded-full border border-dashed border-gray-200 md:h-[1300px] md:w-[1300px]">
+          <div className="h-[300px] w-[300px] rounded-full border border-dashed md:h-[600px] md:w-[600px]"></div>
         </div>
       </div>
       <div className="-z-20 blur-2xl hidden md:flex gap-10 flex-col items-center justify-center text-9xl top-0 left-0 right-0 bottom-0 absolute">

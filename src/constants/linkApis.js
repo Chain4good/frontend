@@ -73,3 +73,14 @@ export const UserV1 = {
 export const AiV1 = {
   AI_ANALYZE_CAMPAIGN: "/ai/analyze-campaign",
 };
+
+export const NotificationV1 = {
+  GET_NOTIFICATIONS: "/notifications",
+  GET_NOTIFICATION: "/notifications",
+  CREATE_NOTIFICATION: "/notifications",
+  UPDATE_NOTIFICATION: "/notifications",
+  DELETE_NOTIFICATION: "/notifications",
+  READ_NOTIFICATION: "/notifications",
+  MARK_ALL_AS_READ: "/notifications/mark-all-read",
+  UNREAD_COUNT: "/notifications/unread-count",
+};
