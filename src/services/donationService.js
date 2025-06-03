@@ -6,7 +6,10 @@ export const createDonation = async (values) => {
   const url = queryString.stringifyUrl({
     url: DonationV1.CREATE_DONATION,
   });
-  const { data } = await requestInstance.post(url, values);
+  const { data } = await requestInstance.post(url, {
+    ...values,
+    token: values.token || "ETH", // Thêm thông tin token
+  });
   return data;
 };
 

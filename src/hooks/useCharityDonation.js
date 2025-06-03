@@ -47,13 +47,12 @@ export const useCharityDonation = () => {
 
       donateETH: async (campaignId, amountInEther) => {
         const contract = await getContract();
-        const tx = await contract.donate(
-          campaignId,
-          ethers.parseEther(amountInEther.toString()),
-          {
-            value: ethers.parseEther(amountInEther.toString()),
-          }
-        );
+        const amountInWei = ethers.parseEther(amountInEther);
+
+        const tx = await contract.donate(campaignId, amountInWei, {
+          value: amountInWei, // Đảm bảo value khớp với amount
+        });
+
         const receipt = await tx.wait();
         return {
           txHash: tx.hash,

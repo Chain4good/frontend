@@ -9,43 +9,6 @@ import CampaignSkeleton from "@/components/CampaignSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
 
-const mockCampaigns = [
-  {
-    id: 1,
-    title: "Hỗ trợ trẻ em vùng cao",
-    description: "Gây quỹ hỗ trợ xây dựng trường học cho trẻ em vùng cao",
-    goal: {
-      eth: "2.5",
-      vnd: "150,000,000",
-    },
-    totalDonated: {
-      eth: "1.2",
-      vnd: "72,000,000",
-      progress: 48,
-    },
-    deadline: "2025-06-30",
-    status: "ACTIVE",
-    image: "/Profiles_HP_Sm.png",
-  },
-  {
-    id: 2,
-    title: "Quỹ học bổng sinh viên",
-    description: "Hỗ trợ học bổng cho sinh viên có hoàn cảnh khó khăn",
-    goal: {
-      eth: "1.8",
-      vnd: "108,000,000",
-    },
-    totalDonated: {
-      eth: "0.9",
-      vnd: "54,000,000",
-      progress: 50,
-    },
-    deadline: "2025-07-15",
-    status: "ACTIVE",
-    image: "/Profiles_HP_Sm.png",
-  },
-];
-
 const MyCampaigns = () => {
   const [filters, setFilters] = React.useState({
     page: 1,

@@ -1,18 +1,7 @@
+import CircleProgress from "@/components/CircleProgress/CircleProgress";
 import ShareModal from "@/components/ShareModal/ShareModal";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { formatVND } from "@/utils/helper";
-import {
-  ChartNoAxesCombined,
-  Clock,
-  HandHeart,
-  Share,
-  ExternalLink,
-} from "lucide-react";
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useCharityDonation } from "@/hooks/useCharityDonation";
-import { formatEther, parseEther } from "ethers";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -21,42 +10,67 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
-import CircleProgress from "@/components/CircleProgress/CircleProgress";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useCharityDonation } from "@/hooks/useCharityDonation";
 import { createDonation } from "@/services/donationService";
+import { TOKENS } from "@/constants/tokens";
+import {
+  ChartNoAxesCombined,
+  Clock,
+  ExternalLink,
+  HandHeart,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
-  const [showAll, setShowAll] = useState(false);
   const [amount, setAmount] = useState("");
+  const [selectedToken, setSelectedToken] = useState("ETH");
   const [isLoading, setIsLoading] = useState(false);
-  const { donateETH } = useCharityDonation();
+  const [showAll, setShowAll] = useState(false); // Add this line
+  const { donateETH, donateToken } = useCharityDonation();
 
   const handleDonate = async () => {
     if (!amount || Number(amount) <= 0) {
       toast.error("Vui lòng nhập số tiền hợp lệ");
       return;
     }
+
     try {
       setIsLoading(true);
-      const { txHash, receipt } = await donateETH(
-        campaign.chainCampaignId,
-        amount
-      );
-      console.log("Receipt:", receipt);
-      console.log("txHash:", txHash);
-      const donation = await createDonation({
-        campaignId: campaign.id,
-        amount: Number(amount),
-        txHash: txHash,
-      });
-      console.log("donation:", donation);
+
+      if (selectedToken === "ETH") {
+        const { txHash, receipt } = await donateETH(
+          campaign.chainCampaignId,
+          amount.toString() // Convert to string to avoid precision issues
+        );
+        await createDonation({
+          campaignId: campaign.id,
+          amount: Number(amount),
+          txHash: txHash,
+          token: "ETH",
+        });
+      } else {
+        const token = TOKENS[selectedToken];
+        const { txHash } = await donateToken(
+          campaign.chainCampaignId,
+          token.address,
+          amount.toString(), // Convert to string
+          token.decimals
+        );
+        await createDonation({
+          campaignId: campaign.id,
+          amount: Number(amount),
+          txHash: txHash,
+          token: selectedToken,
+        });
+      }
 
       toast.success("Quyên góp thành công!");
       setAmount("");
@@ -133,8 +147,21 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
                   </div>
 
                   <div className="space-y-2">
+                    <label className="text-sm font-medium">Chọn token</label>
+                    <select
+                      value={selectedToken}
+                      onChange={(e) => setSelectedToken(e.target.value)}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    >
+                      <option value="ETH">ETH</option>
+                      <option value="USDC">USDC</option>
+                      <option value="USDT">USDT</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
                     <label htmlFor="amount" className="text-sm font-medium">
-                      Số lượng ETH muốn quyên góp
+                      Số lượng {selectedToken} muốn quyên góp
                     </label>
                     <div className="relative">
                       <Input
@@ -148,11 +175,12 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
                         className="pr-12 text-lg"
                       />
                       <div className="absolute inset-y-0 right-3 flex items-center text-sm font-medium text-muted-foreground">
-                        ETH
+                        {selectedToken}
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Tối thiểu 0.01 ETH
+                      Tối thiểu {selectedToken === "ETH" ? "0.01" : "1"}{" "}
+                      {selectedToken}
                     </p>
                   </div>
                 </div>

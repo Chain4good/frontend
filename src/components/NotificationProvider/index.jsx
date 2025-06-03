@@ -46,15 +46,17 @@ export const NotificationProvider = ({ children }) => {
       setUnreadCount(data);
     };
     fetchUnreadCount();
-  }, [notifications]);
+  }, []);
 
   useEffect(() => {
     const fetchNotifications = async () => {
       const { data } = await getNotifications(filters);
       setNotifications(data);
+      const unreadData = await getUnreadNotifications();
+      setUnreadCount(unreadData);
     };
     fetchNotifications();
-  }, [filters, setNotifications, unreadCount]);
+  }, [filters, setNotifications]);
 
   return (
     <NotificationContext.Provider

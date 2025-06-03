@@ -22,9 +22,9 @@ import {
 import { analyzeCampaign } from "@/services/aiService";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Link2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import CommentBox from "../components/CommentBox";
 import FundBox from "../components/FundBox";
 import ShareModal from "../components/ShareModal";
@@ -214,7 +214,10 @@ const Fund = () => {
         {campaign && (
           <>
             <h1 className="text-2xl md:text-4xl font-semibold pb-4 md:pb-6">
-              {campaign.title}
+              {campaign.title}{" "}
+              <Link to={`https://sepolia.etherscan.io/tx/${campaign?.txHash}`}>
+                <Link2Icon />
+              </Link>
             </h1>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 ">

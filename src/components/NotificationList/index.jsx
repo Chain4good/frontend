@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNotification } from "../NotificationProvider";
 import { Bell } from "lucide-react";
 import {
@@ -12,14 +12,22 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NotificationType } from "@/constants";
 import { Link } from "react-router-dom";
+import { useNotificationSound } from "@/hooks/useNotificationSound";
 
 const NotificationList = () => {
+  const { playNotificationSound } = useNotificationSound();
   const {
     notifications,
     unreadCount,
     markAsReadNotification,
     markAllAsReadNotification,
   } = useNotification();
+
+  useEffect(() => {
+    if (unreadCount > 0) {
+      // playNotificationSound();
+    }
+  }, [unreadCount, playNotificationSound]);
 
   return (
     <DropdownMenu>

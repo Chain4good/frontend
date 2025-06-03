@@ -2,7 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import ProgressBar from "../ProgressBar/ProgressBar";
 import { Badge } from "../ui/badge";
-import { CampaignStatus } from "@/constants/status";
+import {
+  CampaignStatus,
+  CampaignStatusColors,
+  CampaignStatusLabel,
+} from "@/constants/status";
 import { CheckCircle } from "lucide-react";
 import { truncate } from "lodash";
 const Card = ({ campaign, size, titleMaxLength }) => {
@@ -41,11 +45,14 @@ const Card = ({ campaign, size, titleMaxLength }) => {
           {campaign?._count?.donations} Đóng góp
         </span>
         <Badge
-          variant={campaign?.status === "ACTIVE" ? "secondary" : "default"}
+          // variant={campaign?.status === "ACTIVE" ? "secondary" : "default"}
           className="absolute top-4 right-4 flex gap-2 items-center"
+          style={{
+            backgroundColor: CampaignStatusColors[campaign?.status],
+          }}
         >
           {campaign?.status === "FINISHED" && <CheckCircle size={18} />}
-          {CampaignStatus[campaign?.status]}
+          {CampaignStatusLabel[campaign?.status]}
         </Badge>
       </div>
       <div className="p-1">

@@ -9,6 +9,11 @@ import { parseEther } from "ethers";
 import { calculateEthGoal, updateCampaign } from "@/services/campaignService";
 import { ADDRESS_ZERO } from "@/constants";
 import { useState } from "react";
+import {
+  CampaignStatus,
+  CampaignStatusColors,
+  CampaignStatusLabel,
+} from "@/constants/status";
 
 const CampaignCard = ({ campaign }) => {
   const { createCampaign } = useCharityDonation();
@@ -63,6 +68,7 @@ const CampaignCard = ({ campaign }) => {
       const campaignUpdate = await updateCampaign(campaign.id, {
         chainCampaignId,
         txHash,
+        status: CampaignStatus.ACTIVE,
       });
       toast.success("Hợp đồng đã được tạo thành công!");
     } catch (error) {
@@ -125,26 +131,27 @@ const CampaignCard = ({ campaign }) => {
             <span>{campaign.totalDonated.progress}%</span>
           </div>
 
-          {campaign.status === "ACTIVE" && !campaign.chainCampaignId && (
-            <Button
-              onClick={handleCreateContract}
-              className="w-full"
-              variant="outline"
-              disabled={isCreating}
-            >
-              {isCreating ? (
-                <>
-                  <span className="animate-spin mr-2">◯</span>
-                  Đang tạo hợp đồng...
-                </>
-              ) : (
-                <>
-                  <Pickaxe className="w-4 h-4 mr-2" />
-                  Tạo hợp đồng
-                </>
-              )}
-            </Button>
-          )}
+          {campaign.status === CampaignStatus.APPROVED &&
+            !campaign.chainCampaignId && (
+              <Button
+                onClick={handleCreateContract}
+                className="w-full"
+                variant="outline"
+                disabled={isCreating}
+              >
+                {isCreating ? (
+                  <>
+                    <span className="animate-spin mr-2">◯</span>
+                    Đang tạo hợp đồng...
+                  </>
+                ) : (
+                  <>
+                    <Pickaxe className="w-4 h-4 mr-2" />
+                    Tạo hợp đồng
+                  </>
+                )}
+              </Button>
+            )}
           {campaign.chainCampaignId && (
             <a
               href={`https://sepolia.etherscan.io/tx/${campaign.txHash}`}
@@ -160,9 +167,11 @@ const CampaignCard = ({ campaign }) => {
       </div>
       <Badge
         className="absolute top-4 right-4"
-        variant={campaign.status === "ACTIVE" ? "default" : "secondary"}
+        style={{
+          backgroundColor: CampaignStatusColors[campaign.status],
+        }}
       >
-        {campaign.status}
+        {CampaignStatusLabel[campaign.status]}
       </Badge>
     </div>
   );
