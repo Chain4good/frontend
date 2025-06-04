@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { HeartHandshake, LogIn, Menu, Search } from "lucide-react";
+import { HeartHandshake, LogIn, Menu, MenuIcon, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -247,13 +247,16 @@ const Header = () => {
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <Avatar>
-                  <AvatarImage
-                    src={user.image || "https://github.com/shadcn.png"}
-                    alt="@shadcn"
-                  />
-                  <AvatarFallback>CG</AvatarFallback>
-                </Avatar>
+                <div className="flex gap-2 items-center py-1 px-2 border rounded-full shadow-sm">
+                  <MenuIcon size={22} />
+                  <Avatar>
+                    <AvatarImage
+                      src={user.image || "https://github.com/shadcn.png"}
+                      alt="@shadcn"
+                    />
+                    <AvatarFallback>CG</AvatarFallback>
+                  </Avatar>
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>

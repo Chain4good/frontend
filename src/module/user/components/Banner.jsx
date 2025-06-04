@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Banner = () => {
   return (
@@ -7,19 +8,24 @@ const Banner = () => {
       <div className="flex flex-1 ">
         <div className="flex-1"></div>
         <div className="flex items-center flex-col gap-4">
-          <p className="md:text-xl text-base font-semibold text-primary text-center md:mb-6 mb-2">
+          <p className="md:text-xl text-base font-semibold font-sans text-primary text-center md:mb-6 mb-2">
             {"#1 Nền tảng gây quỹ cộng đồng Blockchain"}
           </p>
           <h1
-            className="md:text-7xl text-4xl  text-center capitalize leading-[48px] font-semibold tracking-tight md:leading-[90px]"
+            className="md:text-7xl text-4xl font-sans text-center capitalize leading-[48px] font-semibold tracking-tight md:leading-[90px]"
             dangerouslySetInnerHTML={{
               __html:
                 "Gây quỹ <br/> Minh bạch <br/> với Hợp đồng <br/> Thông minh",
             }}
           />
-          <Button size="xl" className="font-semibold text-lg mt-2 rounded-2xl">
-            {"Bắt đầu chiến dịch"}
-          </Button>
+          <Link to={"/create/fundraiser/category"}>
+            <Button
+              size="xl"
+              className="font-semibold text-lg mt-2 rounded-2xl"
+            >
+              {"Bắt đầu chiến dịch"}
+            </Button>
+          </Link>
         </div>
         <div className="flex-1"></div>
       </div>

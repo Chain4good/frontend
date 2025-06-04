@@ -4,8 +4,25 @@ import Discover from "../components/Discover";
 import Guide from "../components/Guide";
 import KeyFeature from "../components/KeyFeature";
 import Topic from "../components/Topic";
+import { usePost } from "@/hooks/usePost";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { recommendations } from "@/services/aiService";
 
 export default function Home() {
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: 4,
+  });
+  const { data: posts, isLoading } = usePost(filters);
+  const { data: recommendationsData } = useQuery({
+    queryKey: ["recommendations"],
+    queryFn: () => recommendations(),
+    enabled: true,
+  });
+
+  console.log(recommendationsData);
+
   return (
     <>
       <Helmet>
@@ -33,7 +50,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-8">
           <Discover />
         </div>
-        <Topic />
+        <Topic posts={posts} />
       </main>
     </>
   );

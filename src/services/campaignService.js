@@ -75,7 +75,7 @@ export const getCampaigns = async (filters) => {
   // await new Promise((resolve) => setTimeout(resolve, 1500)); // 1.5 second delay
 
   const url = queryString.stringifyUrl({
-    url: CampaignV1.GET_CAMPAIGNS,
+    url: CampaignV1.GET_CAMPAIGNS_VALID,
     query: {
       ...filters,
     },

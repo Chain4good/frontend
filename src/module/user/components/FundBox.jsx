@@ -253,7 +253,7 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
                         href={`https://sepolia.etherscan.io/address/${donation?.address}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 hover:text-primary"
+                        className="flex items-center gap-1 hover:text-primary font-mono"
                       >
                         {donation?.short}
                         <ExternalLink className="w-3 h-3" />

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -29,6 +33,9 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --font-primary: "Space Grotesk", sans-serif;
+    --font-heading: "Plus Jakarta Sans", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
   }
 
   .dark {

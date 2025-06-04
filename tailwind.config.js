@@ -179,8 +179,13 @@ export default {
         gentleFloat3: "gentleFloat2 7s ease-in-out infinite",
         "bell-shake": "bell-shake 1s infinite",
       },
+      fontFamily: {
+        sans: ["Space Grotesk", "sans-serif"],
+        heading: ["Plus Jakarta Sans", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
     },
   },
   // eslint-disable-next-line no-undef
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };

@@ -9,6 +9,7 @@ const Home = lazy(() => import("./module/user/pages/Home"));
 const About = lazy(() => import("./module/user/pages/About"));
 const Search = lazy(() => import("./module/user/pages/Search"));
 const SignInPage = lazy(() => import("./module/user/pages/SignIn"));
+const Post = lazy(() => import("./module/user/pages/Post"));
 const SignUpPage = lazy(() => import("./module/user/pages/SignUp"));
 const CreateLayout = lazy(() => import("./module/user/layouts/CreateLayout"));
 const Category = lazy(() => import("./module/user/pages/Fundraiser/Category"));
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
       { path: "discover", element: withSuspense(Discover) },
       { path: "discover/:id", element: withSuspense(DiscoverBrowse) },
       { path: "my-campaigns", element: withSuspense(MyCampaigns) },
+      { path: "post/:slug", element: withSuspense(Post) },
       { path: "fund/:id", element: withSuspense(Fund) },
       { path: "*", element: <NotFound /> },
     ],

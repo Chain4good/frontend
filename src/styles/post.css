@@ -1,0 +1,24 @@
+#post h1 {
+  font-size: 82px;
+  line-height: 82px;
+}
+
+#post {
+  font-size: 16px;
+}
+#post img {
+  border-radius: 25px;
+}
+#post p {
+  max-width: 752px;
+}
+#post td strong {
+  font-size: 32px;
+  line-height: 38.4px;
+}
+
+#post tr {
+  border: none;
+}
+#post tr td {
+}

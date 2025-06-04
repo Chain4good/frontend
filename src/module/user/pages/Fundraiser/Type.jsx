@@ -49,13 +49,13 @@ const Type = () => {
         >
           {fundraiseTypes?.map((item, index) => (
             <ToggleGroupItem
-              className="w-full border rounded-2xl hover:bg-primary/10 h-fit p-4 gap-4 flex justify-start"
+              className="w-full border rounded-2xl text-base hover:bg-primary/10 h-fit p-4 gap-4 flex justify-start"
               key={item.value}
               value={item.value}
             >
               <img src={item.image} className="rounded-2xl w-20" />
               <div className="text-left font-thin">
-                <h3>{item.label}</h3>
+                <h3 className="font-semibold">{item.label}</h3>
                 <p className="text-muted-foreground">{item.description}</p>
               </div>
             </ToggleGroupItem>

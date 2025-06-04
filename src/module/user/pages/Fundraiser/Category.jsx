@@ -51,8 +51,8 @@ const Category = () => {
             value={newCampaign.countryId}
             onValueChange={(value) => changeCampaignValue("countryId", value)}
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Địa chỉ" />
+            <SelectTrigger className="w-full" size="lg">
+              <SelectValue placeholder="Địa chỉ" size="lg" />
             </SelectTrigger>
             <SelectContent>
               {countries?.map((country) => (

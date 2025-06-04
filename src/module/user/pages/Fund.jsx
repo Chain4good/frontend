@@ -14,7 +14,7 @@ import VideoPlayer from "@/components/VideoPlayer/VideoPlayer";
 import { CampaignStatus } from "@/constants/status";
 import { useCharityDonation } from "@/hooks/useCharityDonation";
 import { formatCampaign, formattedDonors } from "@/lib/utils";
-import { getCampaignById } from "@/services/campaignService";
+import { getCampaignById, updateCampaign } from "@/services/campaignService";
 import {
   createComment,
   getCommentsByCampaign,
@@ -31,14 +31,18 @@ import ShareModal from "../components/ShareModal";
 import AnalysisResult from "@/components/AnalysisResult";
 import AnalyzeButton from "@/components/AnalyzeButton";
 import { Helmet } from "react-helmet-async";
+import FundCampaignStatus from "../components/FundCampaignStatus";
+import { getDonationHistory } from "@/services/donationService";
+import DonationChart from "@/components/DonationChart";
 
 const Fund = () => {
   const { id } = useParams();
-  const { getCampaign, getDonors, listenToFundsWithdrawn } =
+  const { getCampaign, getDonors, listenToFundsWithdrawn, getCampaignStatus } =
     useCharityDonation();
   const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [campaignStatus, setCampaignStatus] = useState(null);
 
   const {
     data: campaign,
@@ -119,6 +123,40 @@ const Fund = () => {
     };
   }, [campaign?.chainCampaignId, id, listenToFundsWithdrawn]);
 
+  useEffect(() => {
+    const fetchCampaignStatus = async () => {
+      try {
+        const status = await getCampaignStatus(campaign.chainCampaignId);
+        const { isActive, isSuccessful, remainingTime } = status;
+
+        setCampaignStatus({
+          isActive,
+          isSuccessful,
+          remainingTime: Number(remainingTime),
+        });
+
+        // Update campaign status logic
+        if (!isActive && isSuccessful) {
+          // Campaign finished successfully
+          updateCampaign(campaign.id, {
+            status: "FINISHED",
+          });
+        } else if (!isActive && !isSuccessful) {
+          // Campaign ended but didn't reach goal
+          updateCampaign(campaign.id, {
+            status: "CANCELLED",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching campaign status:", error);
+      }
+    };
+
+    if (campaign?.chainCampaignId) {
+      fetchCampaignStatus();
+    }
+  }, [campaign?.chainCampaignId]);
+
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
     queryKey: ["comments", campaign?.id],
     queryFn: () => getCommentsByCampaign(campaign.id),
@@ -174,6 +212,12 @@ const Fund = () => {
     });
   };
 
+  const { data: donationHistory } = useQuery({
+    queryKey: ["donationHistory", id],
+    queryFn: () => getDonationHistory(id),
+    enabled: !!id,
+  });
+
   return (
     <>
       <Helmet>
@@ -213,25 +257,21 @@ const Fund = () => {
         {error && <div>Error: {error.message}</div>}
         {campaign && (
           <>
-            <h1 className="text-2xl md:text-4xl font-semibold pb-4 md:pb-6">
-              {campaign.title}{" "}
-              <Link to={`https://sepolia.etherscan.io/tx/${campaign?.txHash}`}>
-                <Link2Icon />
-              </Link>
-            </h1>
+            <Link
+              to={`https://sepolia.etherscan.io/tx/${campaign?.txHash}`}
+              className="text-2xl md:text-4xl font-semibold pb-4 md:pb-6 flex items-center gap-1"
+            >
+              {campaign.title} <Link2Icon />
+            </Link>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 ">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div className="col-span-1 md:col-span-2">
                 <div className="relative">
                   {renderMedia(campaign.cover)}
-                  {campaign.status === "FINISHED" && (
-                    <Badge
-                      className="absolute top-4 left-4"
-                      variant={"default"}
-                    >
-                      <CheckCircle className="mr-2 h-3 w-3 md:h-4 md:w-4" />
-                      {CampaignStatus[campaign.status]}
-                    </Badge>
+                  {campaignStatus && (
+                    <div className="absolute top-4 left-4">
+                      <FundCampaignStatus status={campaignStatus} />
+                    </div>
                   )}
                 </div>
 
@@ -250,6 +290,16 @@ const Fund = () => {
                     </p>
                   </div>
                 </div>
+
+                <div className="mt-8">
+                  {donationHistory && (
+                    <DonationChart
+                      data={donationHistory.data}
+                      summary={donationHistory.summary}
+                    />
+                  )}
+                </div>
+
                 <Separator className="my-6 md:my-8" />
 
                 <div className="mb-6">

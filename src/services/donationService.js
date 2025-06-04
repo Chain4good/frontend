@@ -44,3 +44,14 @@ export const deleteDonation = async (id) => {
   const { data } = await requestInstance.delete(url);
   return data;
 };
+
+export const getDonationHistory = async (id, params = {}) => {
+  const url = queryString.stringifyUrl({
+    url: `/campaigns/${id}/donation-history`,
+    query: {
+      ...params,
+    },
+  });
+  const response = await requestInstance.get(url);
+  return response.data;
+};

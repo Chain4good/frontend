@@ -37,6 +37,7 @@ export const CoverV1 = {
 
 export const CampaignV1 = {
   GET_CAMPAIGNS: "/campaigns",
+  GET_CAMPAIGNS_VALID: "/campaigns/valid",
   GET_CAMPAIGN: "/campaigns",
   CREATE_CAMPAIGN: "/campaigns",
   UPDATE_CAMPAIGN: "/campaigns",
@@ -71,7 +72,9 @@ export const UserV1 = {
 };
 
 export const AiV1 = {
-  AI_ANALYZE_CAMPAIGN: "/ai/analyze-campaign",
+  AI_ANALYZE_CAMPAIGN: "/ai/analyze-campaign-gemini",
+  AI_OPTIMIZE_CAMPAIGN: "/ai/optimize-campaign",
+  AI_RECOMMENDATIONS: "/ai/recommendations",
 };
 
 export const NotificationV1 = {
@@ -83,4 +86,21 @@ export const NotificationV1 = {
   READ_NOTIFICATION: "/notifications",
   MARK_ALL_AS_READ: "/notifications/mark-all-read",
   UNREAD_COUNT: "/notifications/unread-count",
+};
+
+export const TopicV1 = {
+  GET_TOPICS: "/topics",
+  GET_TOPIC: "/topics",
+  CREATE_TOPIC: "/topics",
+  UPDATE_TOPIC: "/topics",
+  DELETE_TOPIC: "/topics",
+};
+
+export const PostV1 = {
+  GET_POSTS: "/posts",
+  GET_POST: "/posts",
+  CREATE_POST: "/posts",
+  UPDATE_POST: "/posts",
+  DELETE_POST: "/posts",
+  GET_POST_BY_SLUG: "/posts/slug",
 };
