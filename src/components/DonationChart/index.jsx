@@ -10,18 +10,41 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { format, parseISO, subDays } from "date-fns";
 
 const DonationChart = ({ data, summary }) => {
-  const formattedData = data.map((item) => ({
-    ...item,
-    rawDate: item.date,
-    date: format(parseISO(item.date), "dd/MM/yyyy"),
-    total_amount: Number(item.total_amount.toFixed(4)), // Round to 4 decimal places for ETH
-  }));
+  // Lọc và đảm bảo có 7 ngày gần nhất
+  const getLast7DaysData = () => {
+    const today = new Date();
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = subDays(today, i);
+      return format(date, "dd/MM/yyyy");
+    }).reverse();
 
-  // Add custom tooltip formatter for better display
+    const formattedData = data
+      .map((item) => ({
+        ...item,
+        date: format(parseISO(item.date), "dd/MM/yyyy"),
+        total_amount: Number(item.total_amount.toFixed(4)),
+      }))
+      .slice(-7);
+
+    // Tạo object map từ dữ liệu hiện có
+    const dataMap = formattedData.reduce((acc, item) => {
+      acc[item.date] = item.total_amount;
+      return acc;
+    }, {});
+
+    // Đảm bảo có đủ 7 ngày, thêm các ngày thiếu với giá trị 0
+    return last7Days.map((date) => ({
+      date,
+      total_amount: dataMap[date] || 0,
+    }));
+  };
+
+  const formattedData = getLast7DaysData();
+
+  // Custom tooltip không thay đổi
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -35,78 +58,59 @@ const DonationChart = ({ data, summary }) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Thống kê quyên góp</CardTitle>
+    <Card className="w-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Thống kê quyên góp</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="day" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="day">Ngày</TabsTrigger>
-            <TabsTrigger value="week">Tuần</TabsTrigger>
-            <TabsTrigger value="month">Tháng</TabsTrigger>
-          </TabsList>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={formattedData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            >
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 12 }}
+                interval={0}
+                angle={-45}
+                textAnchor="end"
+                height={50}
+              />
+              <YAxis
+                tickFormatter={(value) => `${value}`}
+                tick={{ fontSize: 12 }}
+                width={40}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <CartesianGrid strokeDasharray="3 3" />
+              <Bar
+                name="Số lượng ETH"
+                dataKey="total_amount"
+                fill="hsl(var(--primary))"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={40}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-          <TabsContent value="day" className="space-y-4">
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={formattedData}>
-                  <XAxis dataKey="date" />
-                  <YAxis tickFormatter={(value) => `${value} ETH`} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <Bar
-                    name="Số lượng ETH"
-                    dataKey="total_amount"
-                    fill="hsl(var(--primary))"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+        <div className="grid grid-cols-3 gap-2 mt-4 text-center text-sm">
+          <div className="bg-muted rounded-lg p-2">
+            <div className="text-muted-foreground">Tổng lượt</div>
+            <div className="font-bold">{summary.totalDonations}</div>
+          </div>
+          <div className="bg-muted rounded-lg p-2">
+            <div className="text-muted-foreground">Tổng tiền</div>
+            <div className="font-bold">{summary.totalAmount} ETH</div>
+          </div>
+          <div className="bg-muted rounded-lg p-2">
+            <div className="text-muted-foreground">Trung bình</div>
+            <div className="font-bold">
+              {summary.averageAmount.toFixed(8)} ETH
             </div>
-
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Tổng số lượt quyên góp
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {summary.totalDonations}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Tổng số tiền
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {summary.totalAmount} ETH
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Trung bình mỗi lượt
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {summary.averageAmount} ETH
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Tương tự cho week và month */}
-        </Tabs>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

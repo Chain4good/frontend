@@ -2,6 +2,9 @@ export const AuthV1 = {
   LOGIN: "/auth/login",
   REGISTER: "/auth/register",
   GET_PROFILE: "/auth/profile",
+  LOGOUT: "/auth/logout",
+  VERIFY_EMAIL: "/auth/verify-email",
+  RESEND_VERIFICATION_EMAIL: "/auth/resend-otp",
 };
 
 export const CategoryV1 = {
@@ -103,4 +106,10 @@ export const PostV1 = {
   UPDATE_POST: "/posts",
   DELETE_POST: "/posts",
   GET_POST_BY_SLUG: "/posts/slug",
+};
+
+export const ReportV1 = {
+  GET_REPORTS: "/reports",
+  GET_REPORT: "/reports",
+  CREATE_REPORT: "/reports",
 };

@@ -8,8 +8,10 @@ import LoadingPage from "./components/LoadingPage";
 const Home = lazy(() => import("./module/user/pages/Home"));
 const About = lazy(() => import("./module/user/pages/About"));
 const Search = lazy(() => import("./module/user/pages/Search"));
+const VerifyEmail = lazy(() => import("./module/user/pages/VerifyEmail"));
 const SignInPage = lazy(() => import("./module/user/pages/SignIn"));
 const Post = lazy(() => import("./module/user/pages/Post"));
+const Logout = lazy(() => import("./module/user/pages/Logout"));
 const SignUpPage = lazy(() => import("./module/user/pages/SignUp"));
 const CreateLayout = lazy(() => import("./module/user/layouts/CreateLayout"));
 const Category = lazy(() => import("./module/user/pages/Fundraiser/Category"));
@@ -29,6 +31,7 @@ const DiscoverBrowse = lazy(() => import("./module/user/pages/DiscoverBrowse"));
 // Loading component
 
 // Wrap component with Suspense
+// eslint-disable-next-line no-unused-vars
 const withSuspense = (Component) => (
   <Suspense fallback={<LoadingPage />}>
     <Component />
@@ -44,6 +47,7 @@ const router = createBrowserRouter([
       { path: "about", element: withSuspense(About) },
       { path: "search", element: withSuspense(Search) },
       { path: "profile", element: withSuspense(Profile) },
+      { path: "logout", element: withSuspense(Logout) },
       { path: "discover", element: withSuspense(Discover) },
       { path: "discover/:id", element: withSuspense(DiscoverBrowse) },
       { path: "my-campaigns", element: withSuspense(MyCampaigns) },
@@ -55,6 +59,10 @@ const router = createBrowserRouter([
   {
     path: "/sign-in",
     element: withSuspense(SignInPage),
+  },
+  {
+    path: "/verify-email",
+    element: withSuspense(VerifyEmail),
   },
   {
     path: "/sign-up",

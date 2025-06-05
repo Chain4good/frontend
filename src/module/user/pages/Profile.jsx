@@ -8,7 +8,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Mail, Phone, MapPin, Edit, Camera } from "lucide-react";
+import {
+  CalendarDays,
+  Mail,
+  Phone,
+  MapPin,
+  Edit,
+  Camera,
+  Check,
+} from "lucide-react";
 import useUserStore from "@/hooks/useUserStore";
 import { formatDate } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -235,9 +243,17 @@ const Profile = () => {
                   <h2 className="text-2xl md:text-3xl font-bold">
                     {user?.name}
                   </h2>
-                  <Badge variant="outline">
-                    {user?.roleId === 2 ? "User" : "Admin"}
-                  </Badge>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline">
+                      {user?.roleId === 2 ? "User" : "Admin"}
+                    </Badge>
+                    {user?.isVerified && (
+                      <Badge variant="secondary" className="gap-1">
+                        <Check className="h-3 w-3" />
+                        Email đã xác minh
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <EditProfileForm
                   user={user}

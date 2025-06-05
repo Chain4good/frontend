@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import useUserStore from "@/hooks/useUserStore";
 import { connectWallet } from "@/lib/contract";
 import { signup } from "@/services/authService";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,9 +43,10 @@ const SignUpPage = () => {
 
   const mutation = useMutation({
     mutationFn: (data) => signup(data),
-    onSuccess: () => {
-      toast.success("Đăng ký thành công!");
-      navigate("/sign-in");
+    onSuccess: ({ data }) => {
+      // useUserStore.getState().setUserData(data.data);
+      toast.success("Đăng ký thành công! Vui lòng xác thực email.");
+      navigate("/verify-email");
     },
     onError: (error) => {
       toast.error(error.message || "Có lỗi xảy ra!");
@@ -175,10 +177,10 @@ const SignUpPage = () => {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Nhập lại mật khẩu</Label>
+            <Label htmlFor="retypePassword">Nhập lại mật khẩu</Label>
             <Input
-              id="password"
-              type="retypePassword"
+              id="retypePassword"
+              type="password"
               placeholder="••••••••"
               {...register("retypePassword")}
             />

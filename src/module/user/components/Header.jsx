@@ -229,7 +229,7 @@ const Header = () => {
             <Button
               variant="nav"
               className="flex gap-1"
-              onClick={() => handleNaivigation("/sign-up")}
+              onClick={() => handleNaivigation("/sign-in")}
             >
               <span>Đăng nhập</span>
             </Button>
@@ -288,7 +288,7 @@ const Header = () => {
                   onClick={() => {
                     const userStore = useUserStore.getState();
                     userStore.logout();
-                    handleNaivigation("/");
+                    handleNaivigation("/logout");
                   }}
                 >
                   <LogOut className="mr-2 h-4 w-4" />

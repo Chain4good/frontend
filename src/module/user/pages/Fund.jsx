@@ -1,16 +1,17 @@
+import { Separator } from "@/components/ui/separator";
 import FundSkeleton from "@/components/FundSkeleton";
 import ReadMore from "@/components/ReadMore/ReadMore";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Separator } from "@/components/ui/separator";
-import VideoPlayer from "@/components/VideoPlayer/VideoPlayer";
+import AnalysisResult from "@/components/AnalysisResult";
+import AnalyzeButton from "@/components/AnalyzeButton";
+import DonationChart from "@/components/DonationChart";
+import { Helmet } from "react-helmet-async";
+import FundHeader from "../components/Fund/FundHeader";
+import FundMedia from "../components/Fund/FundMedia";
+import FundCreator from "../components/Fund/FundCreator";
+import FundGallery from "../components/Fund/FundGallery";
+import CommentBox from "../components/CommentBox";
+import FundBox from "../components/FundBox";
+import ShareModal from "../components/ShareModal";
 import { CampaignStatus } from "@/constants/status";
 import { useCharityDonation } from "@/hooks/useCharityDonation";
 import { formatCampaign, formattedDonors } from "@/lib/utils";
@@ -25,15 +26,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, Link2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import CommentBox from "../components/CommentBox";
-import FundBox from "../components/FundBox";
-import ShareModal from "../components/ShareModal";
-import AnalysisResult from "@/components/AnalysisResult";
-import AnalyzeButton from "@/components/AnalyzeButton";
-import { Helmet } from "react-helmet-async";
-import FundCampaignStatus from "../components/FundCampaignStatus";
 import { getDonationHistory } from "@/services/donationService";
-import DonationChart from "@/components/DonationChart";
+import ReportCampaignButton from "@/components/ReportCampaignButton";
 
 const Fund = () => {
   const { id } = useParams();
@@ -257,39 +251,20 @@ const Fund = () => {
         {error && <div>Error: {error.message}</div>}
         {campaign && (
           <>
-            <Link
-              to={`https://sepolia.etherscan.io/tx/${campaign?.txHash}`}
-              className="text-2xl md:text-4xl font-semibold pb-4 md:pb-6 flex items-center gap-1"
-            >
-              {campaign.title} <Link2Icon />
-            </Link>
+            <FundHeader campaign={campaign} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div className="col-span-1 md:col-span-2">
-                <div className="relative">
-                  {renderMedia(campaign.cover)}
-                  {campaignStatus && (
-                    <div className="absolute top-4 left-4">
-                      <FundCampaignStatus status={campaignStatus} />
-                    </div>
-                  )}
-                </div>
+                <FundMedia
+                  cover={campaign.cover}
+                  campaignStatus={campaignStatus}
+                  onImageClick={setSelectedImage}
+                />
 
-                <div className="flex gap-3 md:gap-4 items-center mt-4 pb-4">
-                  <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                    <AvatarImage src={campaign?.user?.image} />
-                    <AvatarFallback>CG</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="text-sm md:text-base">
-                      <strong>{campaign?.user?.name}</strong> đang tổ chức buổi
-                      gây quỹ
-                    </div>
-                    <p className="text-muted-foreground text-xs md:text-sm">
-                      {onChainCampaign?.creator}
-                    </p>
-                  </div>
-                </div>
+                <FundCreator
+                  campaign={campaign}
+                  onChainCampaign={onChainCampaign}
+                />
 
                 <div className="mt-8">
                   {donationHistory && (
@@ -314,38 +289,24 @@ const Fund = () => {
                     />
                   )}
                 </div>
+
                 <Separator />
                 <ReadMore
                   className="text-base md:text-lg mt-4 md:mt-6"
                   text={campaign?.description}
                 />
+
                 <Separator className="my-6 md:my-8" />
+
                 <div className="mt-4 md:mt-6">
-                  <Carousel className="w-full">
-                    <CarouselContent className="ml-2 md:ml-4">
-                      {campaign?.images?.map((image, index) => (
-                        <CarouselItem
-                          key={index}
-                          className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
-                        >
-                          <div
-                            className="rounded-md aspect-square overflow-hidden cursor-pointer"
-                            onClick={() => setSelectedImage(image.url)}
-                          >
-                            <img
-                              src={image.url}
-                              alt=""
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="hidden md:flex" />
-                    <CarouselNext className="hidden md:flex" />
-                  </Carousel>
+                  <FundGallery
+                    images={campaign.images}
+                    onImageClick={setSelectedImage}
+                  />
                 </div>
+
                 <Separator className="my-6 md:my-8" />
+
                 <div className="mt-6 md:mt-8">
                   <h2 className="text-xl md:text-2xl font-semibold mb-4">
                     Bình luận
@@ -359,6 +320,7 @@ const Fund = () => {
                   />
                 </div>
               </div>
+
               <div className="col-span-1 order-first md:order-none mb-4 md:mb-0">
                 <FundBox
                   donors={donors}
@@ -366,6 +328,9 @@ const Fund = () => {
                   campaign={campaign}
                   isDonorsLoading={isDonorsLoading}
                 />
+                <div className="flex justify-end mt-4">
+                  <ReportCampaignButton campaignId={campaign.id} />
+                </div>
               </div>
             </div>
             <ShareModal />

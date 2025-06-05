@@ -54,7 +54,7 @@ const SignInPage = () => {
           <div className="text-xl font-semibold">Welcome</div>
           <p>Đăng nhập vào Chain4Good hoặc đăng ký để tiếp tục.</p>
         </div>
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Button variant={"outline"} className="w-full">
             <GoogleIconSvg
               style={{
@@ -75,7 +75,7 @@ const SignInPage = () => {
             />
             Đăng nhập với Facebook
           </Button>
-        </div>
+        </div> */}
         <Separator />
         <form
           onSubmit={handleSubmit(onSubmit)}

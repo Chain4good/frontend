@@ -1,6 +1,20 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 const instance = axios.create({
   baseURL:
     import.meta.env.VITE_APP_BACKEND_URL || "https://api.chain4good.io.vn",
@@ -21,23 +35,35 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu lỗi 401 và chưa thử refresh token
     if (error.response.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => {
+            return instance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        // Gọi API refresh token
         await instance.post("/auth/refresh");
-
-        // Thử lại request ban đầu
+        processQueue(null);
+        isRefreshing = false;
         return instance(originalRequest);
       } catch (refreshError) {
-        // Nếu refresh token thất bại, chuyển về trang login
-        // window.location.href = "/login";
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        Cookies.remove("access_token");
+        window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );
