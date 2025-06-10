@@ -5,8 +5,12 @@ import DOMPurify from "dompurify";
 import { Link, useNavigate } from "react-router-dom";
 import { useCharityDonation } from "@/hooks/useCharityDonation";
 import { toast } from "sonner";
-import { parseEther } from "ethers";
-import { calculateEthGoal, updateCampaign } from "@/services/campaignService";
+import { ethers, parseEther } from "ethers";
+import {
+  calculateEthGoal,
+  calculateTokenGoal,
+  updateCampaign,
+} from "@/services/campaignService";
 import { ADDRESS_ZERO } from "@/constants";
 import { useState } from "react";
 import {
@@ -14,6 +18,7 @@ import {
   CampaignStatusColors,
   CampaignStatusLabel,
 } from "@/constants/status";
+import { TOKENS } from "@/constants/tokens";
 
 const CampaignCard = ({ campaign }) => {
   const { createCampaign } = useCharityDonation();
@@ -56,15 +61,18 @@ const CampaignCard = ({ campaign }) => {
       }
       const durationInMinutes = Math.floor((deadline - now) / (1000 * 60));
 
-      const ethAmount = await calculateEthGoal(campaign.goal);
-      const goalInWei = parseEther(ethAmount.toFixed(18));
+      // Calculate goal based on token type
+      const tokenAmount = await calculateTokenGoal(campaign.goal, "ETH");
+      const goalInWei = ethers.parseUnits(tokenAmount.toFixed(18), 18);
+
       const { chainCampaignId, txHash } = await createCampaign(
         campaign.title,
-        ADDRESS_ZERO,
+        ethers.ZeroAddress,
         goalInWei,
         durationInMinutes * 60,
         campaign.isNoLimit
       );
+
       const campaignUpdate = await updateCampaign(campaign.id, {
         chainCampaignId,
         txHash,

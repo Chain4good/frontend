@@ -47,6 +47,7 @@ export const CampaignV1 = {
   DELETE_CAMPAIGN: "/campaigns",
   GET_MY_CAMPAIGNS: "/campaigns/my-campaigns",
   GET_CALCULATE_ETH_GOAL: "/campaigns/calculate-eth-goal",
+  GET_CALCULATE_TOKEN_GOAL: "/campaigns/calculate-eth-goal",
 };
 
 export const DonationV1 = {

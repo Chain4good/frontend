@@ -28,6 +28,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getDonationHistory } from "@/services/donationService";
 import ReportCampaignButton from "@/components/ReportCampaignButton";
+import { isNumber } from "lodash";
 
 const Fund = () => {
   const { id } = useParams();
@@ -78,9 +79,12 @@ const Fund = () => {
     queryKey: ["campaignOnChain", campaign?.chainCampaignId],
     queryFn: async () => {
       const data = await getCampaign(campaign.chainCampaignId);
+      console.log(data);
+
       return formatCampaign(data);
     },
-    enabled: !!campaign?.chainCampaignId,
+    // Sử dụng typeof để kiểm tra xem chainCampaignId có tồn tại và có phải là number
+    enabled: typeof campaign?.chainCampaignId === "number",
   });
 
   const { data: donors, isLoading: isDonorsLoading } = useQuery({
@@ -89,7 +93,7 @@ const Fund = () => {
       const data = await getDonors(campaign.chainCampaignId);
       return formattedDonors(data);
     },
-    enabled: !!campaign?.chainCampaignId,
+    enabled: typeof campaign?.chainCampaignId === "number",
   });
 
   useEffect(() => {
@@ -120,7 +124,7 @@ const Fund = () => {
   useEffect(() => {
     const fetchCampaignStatus = async () => {
       try {
-        const status = await getCampaignStatus(campaign.chainCampaignId);
+        const status = await getCampaignStatus(campaign?.chainCampaignId);
         const { isActive, isSuccessful, remainingTime } = status;
 
         setCampaignStatus({
@@ -129,14 +133,11 @@ const Fund = () => {
           remainingTime: Number(remainingTime),
         });
 
-        // Update campaign status logic
         if (!isActive && isSuccessful) {
-          // Campaign finished successfully
           updateCampaign(campaign.id, {
             status: "FINISHED",
           });
         } else if (!isActive && !isSuccessful) {
-          // Campaign ended but didn't reach goal
           updateCampaign(campaign.id, {
             status: "CANCELLED",
           });
@@ -146,9 +147,10 @@ const Fund = () => {
       }
     };
 
-    if (campaign?.chainCampaignId) {
+    if (isNumber(campaign?.chainCampaignId)) {
       fetchCampaignStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign?.chainCampaignId]);
 
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
@@ -211,6 +213,8 @@ const Fund = () => {
     queryFn: () => getDonationHistory(id),
     enabled: !!id,
   });
+
+  console.log("onChainCampaign", onChainCampaign);
 
   return (
     <>
@@ -327,6 +331,7 @@ const Fund = () => {
                   onChainCampaign={onChainCampaign}
                   campaign={campaign}
                   isDonorsLoading={isDonorsLoading}
+                  campaignStatus={campaignStatus}
                 />
                 <div className="flex justify-end mt-4">
                   <ReportCampaignButton campaignId={campaign.id} />

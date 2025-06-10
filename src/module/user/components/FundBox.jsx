@@ -17,7 +17,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useCharityDonation } from "@/hooks/useCharityDonation";
+import {
+  useCharityDonation,
+  validateTokenDonation,
+} from "@/hooks/useCharityDonation";
 import { createDonation } from "@/services/donationService";
 import { TOKENS } from "@/constants/tokens";
 import {
@@ -34,7 +37,8 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
   const [selectedToken, setSelectedToken] = useState("ETH");
   const [isLoading, setIsLoading] = useState(false);
   const [showAll, setShowAll] = useState(false); // Add this line
-  const { donateETH, donateToken } = useCharityDonation();
+  const { donateETH, donateToken, donate, updateLendingPool } =
+    useCharityDonation();
 
   const handleDonate = async () => {
     if (!amount || Number(amount) <= 0) {
@@ -58,6 +62,10 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
         });
       } else {
         const token = TOKENS[selectedToken];
+        // await validateTokenDonation(token.address, amount, token.decimals);
+        // const { txHash } = await donate(campaign.chainCampaignId, amount);
+        // console.log(token);
+
         const { txHash } = await donateToken(
           campaign.chainCampaignId,
           token.address,
@@ -156,6 +164,7 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
                       <option value="ETH">ETH</option>
                       <option value="USDC">USDC</option>
                       <option value="USDT">USDT</option>
+                      <option value="WETH">WETH</option>
                     </select>
                   </div>
 
@@ -289,6 +298,17 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
           Xem top
         </Button>
       </div>
+      <Button
+        onClick={async () => {
+          try {
+            const newLendingPool = "0x3289680dd4d6c10bb19b899729cda5eef58aeff1"; // New lending pool address
+            const result = await updateLendingPool(newLendingPool);
+            console.log("Lending pool updated successfully:", result.txHash);
+          } catch (error) {
+            console.error("Failed to update lending pool:", error.message);
+          }
+        }}
+      ></Button>
     </div>
   );
 };

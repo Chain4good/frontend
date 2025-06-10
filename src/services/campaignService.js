@@ -83,3 +83,15 @@ export const getCampaigns = async (filters) => {
   const { data } = await requestInstance.get(url);
   return data;
 };
+
+export const calculateTokenGoal = async (amount, tokenSymbol = "USDC") => {
+  const url = queryString.stringifyUrl({
+    url: CampaignV1.GET_CALCULATE_TOKEN_GOAL,
+    query: {
+      vndAmount: amount,
+      tokenSymbol: tokenSymbol,
+    },
+  });
+  const { data } = await requestInstance.get(url);
+  return data;
+};
