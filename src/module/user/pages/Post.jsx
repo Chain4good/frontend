@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getPostBySlug } from "@/services/postService";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Post = () => {
   const { slug } = useParams();
@@ -17,7 +18,11 @@ const Post = () => {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto px-4 py-8 min-h-[60vh] flex items-center justify-center">
+        <LoadingSpinner message="Đang tải bài viết..." />
+      </div>
+    );
   }
 
   if (error) {
@@ -27,7 +32,7 @@ const Post = () => {
   return (
     <div className="container mx-auto px-4 py-8" id="post">
       <p className="text-muted-foreground mb-4">{post?.data?.topic?.name}</p>
-      {/* <h1 className="text-4xl font-heading font-bold mb-4">
+      {/* <h1 className="text-4xl font-heading font-bold mb-4>
         {post?.data?.title}
       </h1> */}
       {/* <div className="aspect-video mb-6">

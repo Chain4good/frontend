@@ -17,9 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useCharityDonation } from "@/hooks/useCharityDonation";
+import { TOKEN, useCharityDonation } from "@/hooks/useCharityDonation";
 import { createDonation } from "@/services/donationService";
-import { TOKENS } from "@/constants/tokens";
 import {
   ChartNoAxesCombined,
   Clock,
@@ -28,13 +27,17 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import FundBoxDonateDialog from "./Fund/Box/FundBoxDonateDialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 
 const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
   const [amount, setAmount] = useState("");
-  const [selectedToken, setSelectedToken] = useState("ETH");
+  const [selectedToken, setSelectedToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showAll, setShowAll] = useState(false); // Add this line
+  const [showAll, setShowAll] = useState(false);
   const { donateETH, donateToken } = useCharityDonation();
+  const queryClient = useQueryClient();
 
   const handleDonate = async () => {
     if (!amount || Number(amount) <= 0) {
@@ -46,9 +49,9 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
       setIsLoading(true);
 
       if (selectedToken === "ETH") {
-        const { txHash, receipt } = await donateETH(
+        const { txHash } = await donateETH(
           campaign.chainCampaignId,
-          amount.toString() // Convert to string to avoid precision issues
+          amount.toString()
         );
         await createDonation({
           campaignId: campaign.id,
@@ -57,11 +60,11 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
           token: "ETH",
         });
       } else {
-        const token = TOKENS[selectedToken];
+        const token = TOKEN[selectedToken];
         const { txHash } = await donateToken(
           campaign.chainCampaignId,
           token.address,
-          amount.toString(), // Convert to string
+          amount.toString(),
           token.decimals
         );
         await createDonation({
@@ -72,8 +75,19 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
         });
       }
 
+      // Invalidate and refetch queries after successful donation
+      await Promise.all([
+        queryClient.invalidateQueries([
+          "campaignOnChain",
+          campaign.chainCampaignId,
+        ]),
+        queryClient.invalidateQueries(["donors", campaign.chainCampaignId]),
+        queryClient.invalidateQueries(["donationHistory", campaign.id]),
+      ]);
+
       toast.success("Quyên góp thành công!");
       setAmount("");
+      setSelectedToken("");
     } catch (error) {
       console.error("Donation error:", error);
       toast.error("Quyên góp thất bại: " + error.message);
@@ -84,18 +98,29 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
 
   const displayDonations = showAll ? donors : donors?.slice(0, 3);
   const progress = onChainCampaign?.totalDonated?.progress || 0;
+  console.log(displayDonations);
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 flex flex-col gap-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white shadow-md rounded-lg p-6 flex flex-col gap-6 hover-lift"
+    >
       <div className="flex items-center gap-6">
         <div>
-          <h3 className="font-semibold text-2xl">
-            {campaign.status === "FINISHED" && onChainCampaign?.goal.eth}
-            {onChainCampaign?.totalDonated.eth} ETH Raise
-          </h3>
+          <motion.h3
+            className="font-semibold text-2xl"
+            initial={{ scale: 0.5 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 100 }}
+          >
+            {campaign.status === "FINISHED" && onChainCampaign?.goal.formatted}
+            {onChainCampaign?.totalDonated.formatted}{" "}
+            {onChainCampaign?.totalDonated?.symbol}
+          </motion.h3>
           <div className="text-sm text-muted-foreground flex gap-2 items-center">
             <span className="font-semibold underline">
-              {onChainCampaign?.goal.eth} ETH
+              {onChainCampaign?.goal.formatted} {onChainCampaign?.goal?.symbol}
             </span>
             <span>·</span>
             <span>{donors?.length || 0} Đóng góp</span>
@@ -110,6 +135,7 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
       </div>
       <div className="flex gap-3 flex-col">
         {campaign.status !== "FINISHED" && <ShareModal campaign={campaign} />}
+
         {campaign.status !== "FINISHED" && (
           <Dialog>
             <DialogTrigger asChild>
@@ -132,7 +158,8 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Mục tiêu</span>
                       <span className="font-medium">
-                        {onChainCampaign?.goal.eth} ETH
+                        {onChainCampaign?.goal.formatted}{" "}
+                        {onChainCampaign?.goal.symbol}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -140,7 +167,8 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
                         Đã quyên góp
                       </span>
                       <span className="font-medium">
-                        {onChainCampaign?.totalDonated.eth} ETH
+                        {onChainCampaign?.totalDonated.formatted}{" "}
+                        {onChainCampaign?.totalDonated.symbol}
                       </span>
                     </div>
                     <Progress value={progress} className="h-2" />
@@ -240,39 +268,54 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
             ))}
           </div>
         ) : (
-          displayDonations?.map((donation, index) => (
-            <div key={index} className="flex gap-4 items-center">
-              <Avatar>
-                <AvatarFallback>A</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <a
-                        href={`https://sepolia.etherscan.io/address/${donation?.address}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 hover:text-primary font-mono"
-                      >
-                        {donation?.short}
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </TooltipTrigger>
-                    <TooltipContent>{donation?.address}</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold">
-                    {/* {Number(formatEther(donation.amount)).toFixed(4)} ETH */}
-                  </p>
-                  <span className="text-sm text-muted-foreground">
-                    {/* {new Date(donation.timestamp * 1000).toLocaleDateString()} */}
-                  </span>
+          <AnimatePresence>
+            {displayDonations?.map((donation, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex gap-4 items-center hover-scale"
+              >
+                <Avatar>
+                  <AvatarFallback>
+                    {donation.address.slice(2, 4).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <a
+                          href={`https://sepolia.etherscan.io/address/${donation.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 hover:text-primary font-mono"
+                        >
+                          {donation.short}
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent>{donation.address}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold">
+                      {donation.totalAmount.formatted}{" "}
+                      {donation.totalAmount.symbol}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      · {donation.donationCount} lần quyên góp
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      · {donation.lastDonationFormatted}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </div>
 
@@ -289,7 +332,7 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
           Xem top
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

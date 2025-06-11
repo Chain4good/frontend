@@ -1,5 +1,5 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { LoadingSpinner } from "@/components/ui/loading";
 import {
   Select,
   SelectContent,
@@ -11,11 +11,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import useCampaign from "@/hooks/useCampaign";
 import { useCategory } from "@/hooks/useCategory";
 import { useCountry } from "@/hooks/useCountry";
-import React, { useState } from "react";
-import { useFormContext } from "react-hook-form";
-import { useLocation } from "react-router-dom";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const Category = () => {
   const { data: categories, isLoading } = useCategory();
@@ -25,7 +22,7 @@ const Category = () => {
   const error = location.state?.error;
 
   if (isLoading || isLoadingCountry) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner message="Đang tải danh mục..." />;
   }
 
   return (

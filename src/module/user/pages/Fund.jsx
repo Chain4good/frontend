@@ -87,7 +87,10 @@ const Fund = () => {
     queryKey: ["donors", campaign?.chainCampaignId],
     queryFn: async () => {
       const data = await getDonors(campaign.chainCampaignId);
-      return formattedDonors(data);
+      // Pass campaign token address to formattedDonors
+      console.log(formattedDonors(data, onChainCampaign?.tokenAddress));
+
+      return formattedDonors(data, onChainCampaign?.tokenAddress);
     },
     enabled: !!campaign?.chainCampaignId,
   });
@@ -116,6 +119,8 @@ const Fund = () => {
       }
     };
   }, [campaign?.chainCampaignId, id, listenToFundsWithdrawn]);
+
+  console.log("onChainCampaign:", onChainCampaign);
 
   useEffect(() => {
     const fetchCampaignStatus = async () => {

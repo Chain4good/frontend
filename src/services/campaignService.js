@@ -83,3 +83,15 @@ export const getCampaigns = async (filters) => {
   const { data } = await requestInstance.get(url);
   return data;
 };
+
+export const calculateGoal = async (amount, token) => {
+  const url = queryString.stringifyUrl({
+    url: CampaignV1.GET_CALCULATE_GOAL,
+    query: {
+      vndAmount: amount,
+      token,
+    },
+  });
+  const { data } = await requestInstance.get(url);
+  return data;
+};

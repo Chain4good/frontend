@@ -1,19 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import CampaignCard from "../components/CampaignCard";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus, HeartHandshake } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getMyCampaigns } from "@/services/campaignService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  calculateGoal,
+  getMyCampaigns,
+  updateCampaign,
+} from "@/services/campaignService";
 import CampaignSkeleton from "@/components/CampaignSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Helmet } from "react-helmet-async";
+import { TOKEN, useCharityDonation } from "@/hooks/useCharityDonation";
+import { toast } from "sonner";
+import { parseEther, parseUnits } from "ethers";
+import { CampaignStatus } from "@/constants/status";
 
 const MyCampaigns = () => {
   const [filters, setFilters] = React.useState({
     page: 1,
     limit: 10,
   });
+  const { createCampaign } = useCharityDonation();
+  const [isCreating, setIsCreating] = useState(false);
+  const [selectedToken, setSelectedToken] = useState("ETH");
+  const queryClient = useQueryClient();
 
   const {
     data: campaigns,
@@ -45,6 +57,62 @@ const MyCampaigns = () => {
     );
   }
   if (error) return <div>Error: {error.message}</div>;
+
+  const handleCreateContract = async (campaign) => {
+    setIsCreating(true);
+    try {
+      const now = new Date();
+      const deadline = new Date(campaign.deadline);
+      if (deadline <= now) {
+        toast.error("Thời gian hết hạn chiến dịch đã quá hạn.");
+        return;
+      }
+
+      const durationInMinutes = Math.floor((deadline - now) / (1000 * 60));
+
+      // Get token details
+      const token = TOKEN[selectedToken];
+      const tokenAddress = token.address;
+
+      let goalInWei;
+      if (selectedToken === "ETH" || selectedToken === "WETH") {
+        const ethAmount = await calculateGoal(campaign.goal, token.tokenName);
+        goalInWei = parseEther(ethAmount.toFixed(token.decimals));
+      } else {
+        const usdAmount = await calculateGoal(campaign.goal, token.tokenName);
+        goalInWei = parseUnits(
+          usdAmount.toFixed(token.decimals),
+          token.decimals
+        );
+      }
+
+      const { chainCampaignId, txHash } = await createCampaign(
+        campaign.title,
+        tokenAddress,
+        goalInWei,
+        durationInMinutes * 60,
+        campaign.isNoLimit
+      );
+      await updateCampaign(campaign.id, {
+        chainCampaignId,
+        txHash,
+        status: CampaignStatus.ACTIVE,
+        tokenAddress: selectedToken,
+        tokenGoal: goalInWei,
+        tokenSymbol: token.symbol,
+        tokenDecimals: token.decimals,
+      });
+
+      // Refresh campaigns data
+      await queryClient.invalidateQueries(["my-campaigns"]);
+      toast.success("Hợp đồng đã được tạo thành công!");
+    } catch (error) {
+      console.error("Error creating contract:", error);
+      toast.error("Không thể tạo hợp đồng: " + error.message);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <>
@@ -89,7 +157,14 @@ const MyCampaigns = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {campaigns?.data?.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} />
+              <CampaignCard
+                handleCreateContract={handleCreateContract}
+                setSelectedToken={setSelectedToken}
+                selectedToken={selectedToken}
+                isCreating={isCreating}
+                key={campaign.id}
+                campaign={campaign}
+              />
             ))}
           </div>
         )}
