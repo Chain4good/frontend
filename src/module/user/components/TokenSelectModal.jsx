@@ -9,30 +9,58 @@ import {
 import { TOKEN } from "@/hooks/useCharityDonation";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const TokenSelectModal = ({ onSelect, selectedToken }) => {
+const TokenSelectModal = ({ onSelect, selectedToken, campaignAcceptToken }) => {
   const [open, setOpen] = useState(false);
 
+  // Find matching token info for campaignAcceptToken
+  const getTokenByAddress = (address) => {
+    if (!address) return null;
+    const match = Object.entries(TOKEN).find(
+      ([_, token]) => token.address.toLowerCase() === address.toLowerCase()
+    );
+    return match ? { id: match[0], ...match[1] } : null;
+  };
+
+  // Set initial selected token based on campaignAcceptToken
+  useEffect(() => {
+    if (campaignAcceptToken) {
+      const acceptedToken = getTokenByAddress(campaignAcceptToken);
+      if (acceptedToken) {
+        onSelect(acceptedToken);
+      }
+    }
+  }, [campaignAcceptToken]);
+
   const handleSelect = (token) => {
-    onSelect(token); // Truyền toàn bộ token object
+    onSelect(token);
     setOpen(false);
   };
 
-  // Convert TOKEN object to array with id and additional info
-  const tokens = Object.entries(TOKEN).map(([id, token]) => ({
-    id,
-    name: token.name || id, // Fallback to id if name not provided
-    symbol: token.symbol || id,
-    icon: token.icon || "/icons/default-token.svg",
-    description: token.description || `${id} token`,
-    address: token.address,
-    decimals: token.decimals,
-  }));
+  // Filter tokens to only show accepted token if specified
+  const tokens = Object.entries(TOKEN)
+    .filter(
+      ([_, token]) =>
+        !campaignAcceptToken ||
+        token.address.toLowerCase() === campaignAcceptToken.toLowerCase()
+    )
+    .map(([id, token]) => ({
+      id,
+      name: token.name || id,
+      symbol: token.symbol || id,
+      icon: token.icon || "/icons/default-token.svg",
+      description: token.description || `${id} token`,
+      address: token.address,
+      decimals: token.decimals,
+    }));
 
-  // Get selected token info
+  // If no token is selected, use the first available token
   const selectedTokenInfo =
     tokens.find((t) => t.id === selectedToken) || tokens[0];
+
+  // Update button UI based on token filtering
+  const isLocked = campaignAcceptToken && tokens.length === 1;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -40,6 +68,7 @@ const TokenSelectModal = ({ onSelect, selectedToken }) => {
         <Button
           variant="outline"
           className="w-full flex items-center justify-between"
+          disabled={isLocked}
         >
           <div className="flex items-center gap-2">
             <img
@@ -52,13 +81,17 @@ const TokenSelectModal = ({ onSelect, selectedToken }) => {
               ({selectedTokenInfo?.symbol})
             </span>
           </div>
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          {!isLocked && <ChevronDown className="h-4 w-4 opacity-50" />}
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Chọn token cho chiến dịch</DialogTitle>
+          <DialogTitle>
+            {campaignAcceptToken
+              ? "Token được chấp nhận cho chiến dịch này"
+              : "Chọn token cho chiến dịch"}
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-2">
           {tokens.map((token) => (

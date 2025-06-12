@@ -70,30 +70,36 @@ const BehindTheBanner = () => {
           <img
             src="/hero-animals-2.png"
             className="animate-gentleFloat w-[140px] h-[140px]"
+            alt="hero-animals-2.png"
           />
           <img
             src="/hero-business-1.png"
             className="animate-gentleFloat3 w-[140px] h-[140px]"
+            alt="hero-business-1.png"
           />
         </div>
         <div className="flex gap-[800px]">
           <img
             src="/hero-education-1.png"
             className="animate-gentleFloat2 w-[140px] h-[140px]"
+            alt="hero-education-1.png"
           />
           <img
             src="/hero-business-4.png"
             className="animate-gentleFloat3 w-[140px] h-[140px]"
+            alt="hero-business-4.png"
           />
         </div>
         <div className="flex gap-80">
           <img
             src="/hero-education-2.png"
             className="animate-gentleFloat2 w-[140px] h-[140px]"
+            alt="hero-education-2.png"
           />
           <img
             src="/hero-education-3.png"
             className="animate-gentleFloat w-[140px] h-[140px]"
+            alt="hero-education-3.png"
           />
         </div>
       </div>

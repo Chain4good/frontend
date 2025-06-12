@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className="px-4 md:px-0">
       <div className="container grid grid-cols-2 md:grid-cols-4 gap-8 py-10">
         <div>
-          <h4 className="text-lg font-semibold mb-3">{"Donate.title"}</h4>
+          <p className="text-lg font-semibold mb-3">{"Donate.title"}</p>
           <div className="grid gap-3">
             <p className="text-sm text-muted-foreground">
               {"Donate.categories"}
@@ -23,7 +23,7 @@ const Footer = () => {
         </div>
 
         <div>
-          <h4 className="text-lg font-semibold mb-3">{"Fundraise.title"}</h4>
+          <p className="text-lg font-semibold mb-3">{"Fundraise.title"}</p>
           <div className="grid gap-3">
             <p className="text-sm text-muted-foreground">{"Fundraise.howTo"}</p>
             <p className="text-sm text-muted-foreground">
@@ -41,7 +41,7 @@ const Footer = () => {
         </div>
 
         <div>
-          <h4 className="text-lg font-semibold mb-3">{"About.title"}</h4>
+          <p className="text-lg font-semibold mb-3">{"About.title"}</p>
           <div className="grid gap-3">
             <p className="text-sm text-muted-foreground">{"About.how"}</p>
             <p className="text-sm text-muted-foreground">{"About.blog"}</p>
@@ -53,7 +53,7 @@ const Footer = () => {
         </div>
 
         <div>
-          <h4 className="text-lg font-semibold mb-3">Help Center</h4>
+          <p className="text-lg font-semibold mb-3">Help Center</p>
           <div className="grid gap-3">
             <p className="text-sm text-muted-foreground">{"About.how"}</p>
             <p className="text-sm text-muted-foreground">{"About.blog"}</p>

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -107,7 +107,7 @@ const CreateLayout = () => {
             >
               {isPending ? (
                 <>
-                  <span className="animate-spin mr-2">◯</span>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   Đang xử lý...
                 </>
               ) : (

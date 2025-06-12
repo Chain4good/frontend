@@ -9,7 +9,23 @@ import {
 } from "@/constants/status";
 import { CheckCircle } from "lucide-react";
 import { truncate } from "lodash";
+import { TOKEN } from "@/hooks/useCharityDonation"; // Thêm import TOKEN
+
 const Card = ({ campaign, size, titleMaxLength }) => {
+  // Thêm hàm để lấy token info
+  const getTokenInfo = (tokenAddress) => {
+    if (!tokenAddress) return null;
+
+    const matchingToken = Object.entries(TOKEN).find(
+      ([_, token]) =>
+        token.address.toLowerCase() === tokenAddress?.toLowerCase()
+    );
+
+    return matchingToken ? matchingToken[1] : null;
+  };
+
+  const tokenInfo = getTokenInfo(campaign?.tokenAddress);
+
   const renderMedia = () => {
     if (campaign?.cover?.type === "VIDEO") {
       return (
@@ -41,7 +57,14 @@ const Card = ({ campaign, size, titleMaxLength }) => {
     <Link to={`/fund/${campaign?.id}`} className="flex flex-col">
       <div className="relative rounded-lg flex-1 overflow-hidden">
         {renderMedia()}
-        <span className="absolute left-2 bottom-2 px-4 py-1 bg-slate-900 bg-opacity-80 text-white rounded-full">
+        <span className="absolute left-2 bottom-2 px-4 py-1 bg-slate-900 bg-opacity-80 text-white rounded-full flex items-center gap-2">
+          {tokenInfo && (
+            <img
+              src={tokenInfo.icon}
+              alt={tokenInfo.symbol}
+              className="w-4 h-4"
+            />
+          )}
           {campaign?._count?.donations} Đóng góp
         </span>
         <Badge
@@ -59,12 +82,25 @@ const Card = ({ campaign, size, titleMaxLength }) => {
         <h3 className="font-semibold leading-none py-2" title={campaign?.title}>
           {truncate(campaign?.title, { length: titleMaxLength ?? 40 })}
         </h3>
-        <p className="text-sm text-muted-foreground  mb-2">
+        <p className="text-sm text-muted-foreground mb-2">
           Tạo bởi {campaign?.user?.name}
         </p>
+        <div className="flex items-center gap-2 mb-2">
+          {tokenInfo && (
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <img
+                src={tokenInfo.icon}
+                alt={tokenInfo.symbol}
+                className="w-4 h-4"
+              />
+              <span>{tokenInfo.symbol}</span>
+            </div>
+          )}
+        </div>
         <ProgressBar
           value={Number(campaign?.totalDonated)}
-          max={Number(campaign?.ethGoal)}
+          max={Number(campaign?.tokenGoal)}
+          symbol={campaign?.tokenSymbol}
         />
       </div>
     </Link>

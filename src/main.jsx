@@ -9,17 +9,21 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { HelmetProvider } from "react-helmet-async";
 import { NotificationProvider } from "./components/NotificationProvider";
+import { WagmiConfig } from "wagmi";
+import { wagmiConfig } from "./lib/web3modal";
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
   <HelmetProvider>
-    <NotificationProvider>
-      <QueryClientProvider client={queryClient}>
-        <Toaster position="top-center" />
-        <RouterProvider router={router} />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </NotificationProvider>
+    <WagmiConfig config={wagmiConfig}>
+      <NotificationProvider>
+        <QueryClientProvider client={queryClient}>
+          <Toaster position="top-center" />
+          <RouterProvider router={router} />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </NotificationProvider>
+    </WagmiConfig>
   </HelmetProvider>
 );

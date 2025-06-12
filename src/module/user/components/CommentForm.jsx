@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import useUserStore from "@/hooks/useUserStore";
 
@@ -44,7 +44,7 @@ const CommentForm = ({
         <Button type="submit" disabled={!content.trim() || isLoading}>
           {isLoading ? (
             <>
-              <span className="animate-spin mr-2">◯</span>
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
               Đang gửi...
             </>
           ) : (

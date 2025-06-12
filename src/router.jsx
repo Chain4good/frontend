@@ -1,5 +1,5 @@
-import { createBrowserRouter } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { createBrowserRouter, useLocation } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
 import NotFound from "./common/NotFound";
 import MainLayout from "./module/user/layouts/MainLayout";
 import LoadingPage from "./components/LoadingPage";
@@ -38,10 +38,28 @@ const withSuspense = (Component) => (
   </Suspense>
 );
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [pathname]);
+
+  return null;
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <>
+        <ScrollToTop />
+        <MainLayout />
+      </>
+    ),
     children: [
       { index: true, element: withSuspense(Home) },
       { path: "about", element: withSuspense(About) },

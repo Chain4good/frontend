@@ -5,25 +5,45 @@ import {
   CampaignStatusColors,
   CampaignStatusLabel,
 } from "@/constants/status";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import DOMPurify from "dompurify";
 import { motion } from "framer-motion";
 import { isNumber } from "lodash";
-import { Clock, Eye, Pickaxe, Target } from "lucide-react";
+import {
+  AlertCircle,
+  Clock,
+  Eye,
+  Loader2,
+  Lock, // Add Lock import
+  Pickaxe,
+  Target,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import TokenSelectModal from "./TokenSelectModal";
 
 const CampaignCard = ({
   campaign,
   handleCreateContract,
-  isCreating,
-  selectedToken,
-  setSelectedToken,
+  handleCloseCampaign,
+  isClosing,
 }) => {
-  // const { createCampaign } = useCharityDonation();
-  // const [isCreating, setIsCreating] = useState(false);
-  // const [selectedToken, setSelectedToken] = useState("ETH");
+  const [selectedToken, setSelectedToken] = useState("ETH");
+  const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
+  const isExpired = new Date(campaign.deadline) <= new Date();
+
+  // Update handleCreate to manage internal isCreating state
+  const handleCreate = async () => {
+    try {
+      setIsCreating(true);
+      await handleCreateContract(campaign, selectedToken);
+    } catch (error) {
+      console.error("Error creating contract:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const renderMedia = () => {
     if (campaign.cover.type === "VIDEO") {
@@ -68,7 +88,10 @@ const CampaignCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="border relative rounded-lg cursor-pointer overflow-hidden shadow-sm hover:shadow-md"
+      className={cn(
+        "border relative rounded-lg cursor-pointer overflow-hidden shadow-sm hover:shadow-md",
+        isExpired && "opacity-75"
+      )}
     >
       {renderMedia()}
       <div className="p-4">
@@ -89,45 +112,67 @@ const CampaignCard = ({
           <div className="flex justify-between text-sm">
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4" />
-              {/* <span>{campaign.goal.eth} ETH</span> */}
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>{formatDate(campaign.deadline)}</span>
+              <Clock
+                className={cn("w-4 h-4", isExpired && "text-destructive")}
+              />
+              <span className={cn(isExpired && "text-destructive font-medium")}>
+                {isExpired ? "Đã hết hạn" : formatDate(campaign.deadline)}
+              </span>
             </div>
           </div>
-
-          {/* <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full transition-all"
-              style={{ width: `${campaign.totalDonated.progress}%` }}
-            />
-          </div>
-
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Đã gây quỹ: {campaign.totalDonated.symbol}</span>
-            <span>{campaign.totalDonated.progress}%</span>
-          </div> */}
-
+          {/* <>
+            {campaign.status === CampaignStatus.ACTIVE && (
+            
+            )}
+          </> */}
+          {/* {campaign.status === CampaignStatus.ACTIVE &&
+            isNumber(campaign.chainCampaignId) && (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card click
+                  handleCloseCampaign(campaign);
+                }}
+                className="w-full"
+                variant="destructive"
+                disabled={isClosing}
+              >
+                {isClosing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Đang đóng chiến dịch...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Đóng chiến dịch
+                  </>
+                )}
+              </Button>
+            )} */}
           {campaign.status === CampaignStatus.APPROVED &&
-            !campaign.chainCampaignId && (
+            !isNumber(campaign.chainCampaignId) && (
               <div className="space-y-4">
                 <TokenSelectModal
                   selectedToken={selectedToken}
-                  onSelect={(token) => {
-                    console.log("Selected token:", token);
-                    setSelectedToken(token.id);
-                  }}
+                  onSelect={(token) => setSelectedToken(token.id)}
+                  disabled={isExpired}
                 />
                 <Button
-                  onClick={handleCreateContract}
+                  onClick={handleCreate}
                   className="w-full"
                   variant="outline"
-                  disabled={isCreating}
+                  disabled={isCreating || isExpired}
                 >
-                  {isCreating ? (
+                  {isExpired ? (
                     <>
-                      <span className="animate-spin mr-2">◯</span>
+                      <AlertCircle className="w-4 h-4 mr-2 text-destructive" />
+                      Chiến dịch đã hết hạn
+                    </>
+                  ) : isCreating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
                       Đang tạo hợp đồng...
                     </>
                   ) : (
@@ -152,14 +197,16 @@ const CampaignCard = ({
           )}
         </div>
       </div>
-      <Badge
-        className="absolute top-4 right-4"
-        style={{
-          backgroundColor: CampaignStatusColors[campaign.status],
-        }}
-      >
-        {CampaignStatusLabel[campaign.status]}
-      </Badge>
+
+      {/* Status badges */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        {isExpired && <Badge variant="destructive">Đã hết hạn</Badge>}
+        <Badge
+          style={{ backgroundColor: CampaignStatusColors[campaign.status] }}
+        >
+          {CampaignStatusLabel[campaign.status]}
+        </Badge>
+      </div>
     </motion.div>
   );
 };

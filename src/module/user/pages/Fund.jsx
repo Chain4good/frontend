@@ -48,28 +48,6 @@ const Fund = () => {
     enabled: !!id,
   });
 
-  const renderMedia = (cover) => {
-    if (!cover) return null;
-
-    if (cover.type === "VIDEO") {
-      return (
-        <VideoPlayer
-          src={cover.url}
-          // onVideoClick={() => setSelectedImage(cover.url)}
-        />
-      );
-    }
-
-    return (
-      <img
-        className="rounded-lg shadow-md w-full h-96 object-cover"
-        src={cover.url}
-        onClick={() => setSelectedImage(cover.url)}
-        alt={campaign.title}
-      />
-    );
-  };
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -274,6 +252,7 @@ const Fund = () => {
                 <div className="mt-8">
                   {donationHistory && (
                     <DonationChart
+                      symbol={campaign?.tokenSymbol}
                       data={donationHistory.data}
                       summary={donationHistory.summary}
                     />

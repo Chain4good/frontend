@@ -107,8 +107,8 @@ const SignUpPage = () => {
           />
         </div>
         <div className="w-full flex flex-col items-center">
-          <div className="text-xl font-semibold">Welcome</div>
-          <p>Sign in to GoFundMe or sign up to continue.</p>
+          <div className="text-xl font-semibold">Chào mừng</div>
+          <p>Đăng nhập vào ChainGood hoặc đăng ký để tiếp tục.</p>
         </div>
         <div className="space-y-2 w-full">
           {!address && (

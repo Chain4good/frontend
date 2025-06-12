@@ -14,7 +14,7 @@ export const TOKEN = {
     symbol: "USDC",
     icon: "/icons/usdc.svg",
     tokenName: "usd-coin",
-    description: "Stable coin pegged to USD",
+    description: "Đồng stablecoin được neo với USD",
     name: "USD Coin",
   },
   ETH: {
@@ -23,7 +23,7 @@ export const TOKEN = {
     symbol: "ETH",
     icon: "/icons/eth.svg",
     tokenName: "ethereum",
-    description: "Native token of Ethereum network",
+    description: "Token gốc của mạng lưới Ethereum",
     name: "Ethereum",
   },
   USDT: {
@@ -32,8 +32,26 @@ export const TOKEN = {
     symbol: "USDT",
     tokenName: "tether",
     icon: "/icons/usdt.svg",
-    description: "Stable coin pegged to USD",
+    description: "Đồng stablecoin được neo với USD",
     name: "Tether USD",
+  },
+  DAI: {
+    address: "0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357",
+    decimals: 18,
+    symbol: "DAI",
+    tokenName: "dai",
+    icon: "/icons/dai.svg",
+    description: "Đồng stablecoin phi tập trung được neo với USD",
+    name: "DAI Stablecoin",
+  },
+  LINK: {
+    address: "0xf8Fb3713D459D7C1018BD0A49D19b4C44290EBE5",
+    decimals: 18,
+    symbol: "LINK",
+    tokenName: "chainlink",
+    icon: "/icons/chainlink.svg",
+    description: "Token của mạng lưới Oracle phi tập trung",
+    name: "Chainlink",
   },
 };
 
@@ -59,22 +77,40 @@ export const useCharityDonation = () => {
         duration,
         isNoLimit
       ) => {
-        const contract = await getContract();
-        const tx = await contract.createCampaign(
-          title,
-          tokenAddress,
-          goal,
-          duration,
-          isNoLimit
-        );
-        const receipt = await tx.wait();
-        const count = await contract.campaignCount();
-        const chainCampaignId = Number(count) - 1; // 🔥
+        try {
+          const contract = await getContract();
 
-        return {
-          chainCampaignId,
-          txHash: tx.hash,
-        };
+          // Convert goal to BigNumber if it isn't already
+          const goalBigNumber = ethers.getBigInt(goal.toString());
+
+          // Convert duration to number
+          const durationNumber = Number(duration);
+
+          const tx = await contract.createCampaign(
+            title,
+            tokenAddress,
+            goalBigNumber,
+            durationNumber,
+            isNoLimit
+          );
+
+          const receipt = await tx.wait();
+          const count = await contract.campaignCount();
+
+          // Convert BigInt to Number for chainCampaignId
+          const chainCampaignId = Number(count) - 1;
+
+          return {
+            chainCampaignId,
+            txHash: tx.hash,
+          };
+        } catch (error) {
+          console.error("Create campaign error:", error);
+
+          // Convert BigInt to string in error messages
+          const errorMessage = error.message.replace(/BigInt\((.*?)\)/g, "$1");
+          throw new Error(errorMessage);
+        }
       },
 
       donateETH: async (campaignId, amountInEther) => {
@@ -84,11 +120,12 @@ export const useCharityDonation = () => {
           const signer = await provider.getSigner();
           const userAddress = await signer.getAddress();
 
-          // Check user's ETH balance first
           const balance = await provider.getBalance(userAddress);
           const amountInWei = ethers.parseEther(amountInEther);
 
-          // Estimate gas
+          const feeData = await provider.getFeeData();
+          const gasPrice = feeData.gasPrice;
+
           const gasLimit = await contract.donate.estimateGas(
             campaignId,
             amountInWei,
@@ -96,13 +133,10 @@ export const useCharityDonation = () => {
               value: amountInWei,
             }
           );
-          const gasPrice = await provider.getGasPrice();
-          const gasCost = gasLimit * gasPrice;
 
-          // Calculate total cost (amount + gas)
+          const gasCost = gasLimit * gasPrice;
           const totalCost = amountInWei + gasCost;
 
-          // Check if user has enough ETH for amount + gas
           if (balance < totalCost) {
             const requiredETH = ethers.formatEther(totalCost);
             const userETH = ethers.formatEther(balance);
@@ -111,10 +145,9 @@ export const useCharityDonation = () => {
             );
           }
 
-          // Execute transaction with explicit gas settings
           const tx = await contract.donate(campaignId, amountInWei, {
             value: amountInWei,
-            gasLimit: (gasLimit * BigInt(12)) / BigInt(10), // Add 20% buffer
+            gasLimit: (gasLimit * BigInt(12)) / BigInt(10),
             gasPrice,
           });
 

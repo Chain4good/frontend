@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { HeartHandshake, LogIn, Menu, MenuIcon, Search } from "lucide-react";
+import {
+  HeartHandshake,
+  LogIn,
+  Menu,
+  MenuIcon,
+  Search,
+  Wallet,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,10 +33,13 @@ import { Link } from "react-router-dom";
 import MetaMaskAccount from "./MetaMaskAccount";
 import { useNotification } from "@/components/NotificationProvider";
 import NotificationList from "@/components/NotificationList";
+import { useWallet } from "@/hooks/useWallet";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { unreadCount } = useNotification();
+  const { address, isConnected, connect } = useWallet();
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -61,7 +71,7 @@ const Header = () => {
         <div className="flex flex-col  gap-4 mt-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <MetaMaskAccount />
+              {/* <MetaMaskAccount /> */}
             </div>
             <Button
               className="w-full justify-start font-semibold"
@@ -225,6 +235,17 @@ const Header = () => {
         {/* Right section */}
         <div className="flex-1 hidden md:flex gap-2 items-center justify-end">
           <MetaMaskAccount />
+          {/* {isConnected ? (
+            <Button variant="outline" className="gap-2">
+              <Wallet className="w-4 h-4" />
+              {address?.slice(0, 6)}...{address?.slice(-4)}
+            </Button>
+          ) : (
+            <Button onClick={connect} className="gap-2">
+              <Wallet className="w-4 h-4" />
+              Kết nối ví
+            </Button>
+          )} */}
           {!user && (
             <Button
               variant="nav"

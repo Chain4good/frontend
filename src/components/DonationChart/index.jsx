@@ -12,8 +12,7 @@ import {
 } from "recharts";
 import { format, parseISO, subDays } from "date-fns";
 
-const DonationChart = ({ data, summary }) => {
-  // Lọc và đảm bảo có 7 ngày gần nhất
+const DonationChart = ({ data, summary, symbol = "ETH" }) => {
   const getLast7DaysData = () => {
     const today = new Date();
     const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -29,13 +28,11 @@ const DonationChart = ({ data, summary }) => {
       }))
       .slice(-7);
 
-    // Tạo object map từ dữ liệu hiện có
     const dataMap = formattedData.reduce((acc, item) => {
       acc[item.date] = item.total_amount;
       return acc;
     }, {});
 
-    // Đảm bảo có đủ 7 ngày, thêm các ngày thiếu với giá trị 0
     return last7Days.map((date) => ({
       date,
       total_amount: dataMap[date] || 0,
@@ -44,13 +41,12 @@ const DonationChart = ({ data, summary }) => {
 
   const formattedData = getLast7DaysData();
 
-  // Custom tooltip không thay đổi
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-background/95 p-3 rounded-lg border shadow-sm">
           <p className="font-medium">{`Ngày: ${label}`}</p>
-          <p className="text-primary">{`Số lượng: ${payload[0].value} ETH`}</p>
+          <p className="text-primary">{`Số lượng: ${payload[0].value} ${symbol}`}</p>
         </div>
       );
     }
