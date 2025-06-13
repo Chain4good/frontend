@@ -98,12 +98,14 @@ const DonationChart = ({ data, summary, symbol = "ETH" }) => {
           </div>
           <div className="bg-muted rounded-lg p-2">
             <div className="text-muted-foreground">Tổng tiền</div>
-            <div className="font-bold">{summary.totalAmount} ETH</div>
+            <div className="font-bold">
+              {summary.totalAmount} {symbol}
+            </div>
           </div>
           <div className="bg-muted rounded-lg p-2">
             <div className="text-muted-foreground">Trung bình</div>
             <div className="font-bold">
-              {summary.averageAmount.toFixed(8)} ETH
+              {summary.averageAmount.toFixed(8)} {symbol}
             </div>
           </div>
         </div>

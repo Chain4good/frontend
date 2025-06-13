@@ -1,6 +1,7 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { TOKEN } from "@/hooks/useCharityDonation";
+import { FileArchive, FileImage, FileText, Music, Video } from "lucide-react";
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -118,4 +119,54 @@ export const validateFile = (file) => {
   }
 
   return true;
+};
+
+export const getFileInfo = (url) => {
+  const extension = url?.split(".").pop()?.toLowerCase();
+
+  const fileTypes = {
+    // Images
+    jpg: { type: "image", icon: FileImage, color: "text-blue-500" },
+    jpeg: { type: "image", icon: FileImage, color: "text-blue-500" },
+    png: { type: "image", icon: FileImage, color: "text-blue-500" },
+    gif: { type: "image", icon: FileImage, color: "text-blue-500" },
+    webp: { type: "image", icon: FileImage, color: "text-blue-500" },
+
+    // Audio
+    mp3: { type: "audio", icon: Music, color: "text-purple-500" },
+    wav: { type: "audio", icon: Music, color: "text-purple-500" },
+    ogg: { type: "audio", icon: Music, color: "text-purple-500" },
+
+    // Documents
+    pdf: { type: "document", icon: FileText, color: "text-red-500" },
+    doc: { type: "document", icon: FileText, color: "text-blue-600" },
+    docx: { type: "document", icon: FileText, color: "text-blue-600" },
+
+    // Archives
+    zip: { type: "archive", icon: FileArchive, color: "text-yellow-600" },
+    rar: { type: "archive", icon: FileArchive, color: "text-yellow-600" },
+
+    // Text
+    txt: { type: "text", icon: FileText, color: "text-gray-600" },
+
+    // Video
+    mp4: { type: "video", icon: Video, color: "text-green-500" },
+    webm: { type: "video", icon: Video, color: "text-green-500" },
+    mov: { type: "video", icon: Video, color: "text-green-500" },
+    avi: { type: "video", icon: Video, color: "text-green-500" },
+    mkv: { type: "video", icon: Video, color: "text-green-500" },
+  };
+
+  const fileInfo = fileTypes[extension] || {
+    type: "unknown",
+    icon: File,
+    color: "text-gray-500",
+  };
+  const fileName = url?.split("/").pop(); // Lấy tên file từ URL
+
+  return {
+    ...fileInfo,
+    extension,
+    fileName,
+  };
 };

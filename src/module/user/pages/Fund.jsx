@@ -28,6 +28,9 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getDonationHistory } from "@/services/donationService";
 import ReportCampaignButton from "@/components/ReportCampaignButton";
+import CreateProgressDialog from "../components/CreateProgressDialog";
+import ProgressList from "../components/ProgressList";
+import useUserStore from "@/hooks/useUserStore";
 
 const Fund = () => {
   const { id } = useParams();
@@ -37,6 +40,7 @@ const Fund = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [campaignStatus, setCampaignStatus] = useState(null);
+  const { user } = useUserStore();
 
   const {
     data: campaign,
@@ -112,17 +116,21 @@ const Fund = () => {
           remainingTime: Number(remainingTime),
         });
 
-        // Update campaign status logic
-        if (!isActive && isSuccessful) {
-          // Campaign finished successfully
-          updateCampaign(campaign.id, {
-            status: "FINISHED",
-          });
-        } else if (!isActive && !isSuccessful) {
-          // Campaign ended but didn't reach goal
-          updateCampaign(campaign.id, {
-            status: "CANCELLED",
-          });
+        const now = new Date();
+        const deadline = new Date(campaign.deadline);
+        const hasReachedGoal =
+          onChainCampaign?.totalDonated.raw >= onChainCampaign?.goal.raw;
+
+        if (now >= deadline || hasReachedGoal) {
+          if (!isActive && isSuccessful) {
+            updateCampaign(campaign.id, {
+              status: "FINISHED",
+            });
+          } else if (!isActive && !isSuccessful) {
+            updateCampaign(campaign.id, {
+              status: "CANCELLED",
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching campaign status:", error);
@@ -132,7 +140,7 @@ const Fund = () => {
     if (campaign?.chainCampaignId) {
       fetchCampaignStatus();
     }
-  }, [campaign?.chainCampaignId]);
+  }, [campaign?.chainCampaignId, onChainCampaign]);
 
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
     queryKey: ["comments", campaign?.id],
@@ -249,18 +257,7 @@ const Fund = () => {
                   onChainCampaign={onChainCampaign}
                 />
 
-                <div className="mt-8">
-                  {donationHistory && (
-                    <DonationChart
-                      symbol={campaign?.tokenSymbol}
-                      data={donationHistory.data}
-                      summary={donationHistory.summary}
-                    />
-                  )}
-                </div>
-
                 <Separator className="my-6 md:my-8" />
-
                 <div className="mb-6">
                   <AnalyzeButton
                     onClick={handleAnalyzeCampaign}
@@ -281,7 +278,28 @@ const Fund = () => {
                 />
 
                 <Separator className="my-6 md:my-8" />
+                <div className="mt-4 md:mt-6">
+                  {campaign?.status === "ACTIVE" && (
+                    <div className="flex justify-end">
+                      {campaign?.userId === user?.id && (
+                        <CreateProgressDialog campaignId={id} />
+                      )}
+                    </div>
+                  )}
+                  <ProgressList campaignId={id} />
+                </div>
 
+                <div className="mt-8">
+                  {donationHistory && (
+                    <DonationChart
+                      symbol={campaign?.tokenSymbol}
+                      data={donationHistory.data}
+                      summary={donationHistory.summary}
+                    />
+                  )}
+                </div>
+
+                <Separator className="my-6 md:my-8" />
                 <div className="mt-4 md:mt-6">
                   <FundGallery
                     images={campaign.images}
@@ -303,6 +321,7 @@ const Fund = () => {
                     isSubmitting={isAddingComment || isReplying}
                   />
                 </div>
+                {/* Add progress section */}
               </div>
 
               <div className="col-span-1 order-first md:order-none mb-4 md:mb-0">
@@ -317,6 +336,7 @@ const Fund = () => {
                 </div>
               </div>
             </div>
+
             <ShareModal />
           </>
         )}

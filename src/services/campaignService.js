@@ -95,3 +95,19 @@ export const calculateGoal = async (amount, token) => {
   const { data } = await requestInstance.get(url);
   return data;
 };
+
+export const createCampaignProgress = async (campaignId, progressData) => {
+  const url = queryString.stringifyUrl({
+    url: `${CampaignV1.CREATE_CAMPAIGN_PROGRESS}${campaignId}/progress`,
+  });
+  const { data } = await requestInstance.post(url, progressData);
+  return data;
+};
+
+export const getCampaignProgress = async (campaignId) => {
+  const url = queryString.stringifyUrl({
+    url: `${CampaignV1.GET_CAMPAIGN_PROGRESS}${campaignId}/progress`,
+  });
+  const { data } = await requestInstance.get(url);
+  return data;
+};

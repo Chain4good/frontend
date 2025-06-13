@@ -48,6 +48,8 @@ export const CampaignV1 = {
   GET_MY_CAMPAIGNS: "/campaigns/my-campaigns",
   GET_CALCULATE_ETH_GOAL: "/campaigns/calculate-eth-goal",
   GET_CALCULATE_GOAL: "/campaigns/calculate-goal",
+  CREATE_CAMPAIGN_PROGRESS: "/campaigns/",
+  GET_CAMPAIGN_PROGRESS: "/campaigns/",
 };
 
 export const DonationV1 = {
