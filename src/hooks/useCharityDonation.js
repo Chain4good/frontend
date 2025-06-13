@@ -287,11 +287,11 @@ export const useCharityDonation = () => {
         }
       },
 
-      closeCampaign: async (campaignId) => {
-        const contract = await getContract();
-        const tx = await contract.closeCampaign(campaignId);
-        await tx.wait();
-      },
+      // closeCampaign: async (campaignId) => {
+      //   const contract = await getContract();
+      //   const tx = await contract.closeCampaign(campaignId);
+      //   await tx.wait();
+      // },
 
       refund: async (campaignId) => {
         const contract = await getContract();

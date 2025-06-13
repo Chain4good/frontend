@@ -1,30 +1,29 @@
-import React, { useState } from "react";
-import CampaignCard from "../components/CampaignCard";
-import { Link, useNavigate } from "react-router-dom";
+import CampaignSkeleton from "@/components/CampaignSkeleton";
 import { Button } from "@/components/ui/button";
-import { Plus, HeartHandshake } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CampaignStatus } from "@/constants/status";
+import { TOKEN, useCharityDonation } from "@/hooks/useCharityDonation";
 import {
   calculateGoal,
   getMyCampaigns,
   updateCampaign,
 } from "@/services/campaignService";
-import CampaignSkeleton from "@/components/CampaignSkeleton";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Helmet } from "react-helmet-async";
-import { TOKEN, useCharityDonation } from "@/hooks/useCharityDonation";
-import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { parseEther, parseUnits } from "ethers";
-import { CampaignStatus } from "@/constants/status";
+import { HeartHandshake, Plus } from "lucide-react";
+import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import CampaignCard from "../components/CampaignCard";
 
 const MyCampaigns = () => {
   const [filters, setFilters] = React.useState({
     page: 1,
     limit: 10,
   });
-  const { createCampaign, closeCampaign } = useCharityDonation();
+  const { createCampaign } = useCharityDonation();
   const [isCreating, setIsCreating] = useState(false);
-  const [selectedToken, setSelectedToken] = useState("ETH");
   const queryClient = useQueryClient();
   const [isClosing, setIsClosing] = useState(false);
 
@@ -124,26 +123,26 @@ const MyCampaigns = () => {
     }
   };
 
-  const handleCloseCampaign = async (campaign) => {
-    try {
-      setIsClosing(true);
-      await closeCampaign(campaign.chainCampaignId);
-      await updateCampaign(campaign.id, {
-        status: CampaignStatus.FINISHED,
-      });
-      toast.success("Đã đóng chiến dịch thành công!");
-      queryClient.invalidateQueries(["my-campaigns"]);
-    } catch (error) {
-      console.error("Error closing campaign:", error);
-      if (error.code === "ACTION_REJECTED") {
-        toast.error("Bạn đã từ chối ký giao dịch");
-        return;
-      }
-      toast.error("Không thể đóng chiến dịch: " + error.message);
-    } finally {
-      setIsClosing(false);
-    }
-  };
+  // const handleCloseCampaign = async (campaign) => {
+  //   try {
+  //     setIsClosing(true);
+  //     await closeCampaign(campaign.chainCampaignId);
+  //     await updateCampaign(campaign.id, {
+  //       status: CampaignStatus.FINISHED,
+  //     });
+  //     toast.success("Đã đóng chiến dịch thành công!");
+  //     queryClient.invalidateQueries(["my-campaigns"]);
+  //   } catch (error) {
+  //     console.error("Error closing campaign:", error);
+  //     if (error.code === "ACTION_REJECTED") {
+  //       toast.error("Bạn đã từ chối ký giao dịch");
+  //       return;
+  //     }
+  //     toast.error("Không thể đóng chiến dịch: " + error.message);
+  //   } finally {
+  //     setIsClosing(false);
+  //   }
+  // };
 
   return (
     <>
@@ -192,7 +191,7 @@ const MyCampaigns = () => {
                 key={campaign.id}
                 campaign={campaign}
                 handleCreateContract={handleCreateContract}
-                handleCloseCampaign={handleCloseCampaign}
+                // handleCloseCampaign={handleCloseCampaign}
                 isClosing={isClosing}
               />
             ))}
