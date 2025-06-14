@@ -11,7 +11,6 @@ const Discover = () => {
         limit: 5,
       }),
   });
-  console.log("campaigns", campaigns);
 
   return (
     <section className="py-10">

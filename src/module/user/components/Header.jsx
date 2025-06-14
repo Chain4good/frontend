@@ -38,7 +38,7 @@ import { useWallet } from "@/hooks/useWallet";
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { unreadCount } = useNotification();
-  const { address, isConnected, connect } = useWallet();
+  const { address, isConnected, connect, disconnect } = useWallet();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -234,9 +234,9 @@ const Header = () => {
 
         {/* Right section */}
         <div className="flex-1 hidden md:flex gap-2 items-center justify-end">
-          <MetaMaskAccount />
-          {/* {isConnected ? (
-            <Button variant="outline" className="gap-2">
+          {/* <MetaMaskAccount /> */}
+          {isConnected ? (
+            <Button variant="outline" className="gap-2" onClick={disconnect}>
               <Wallet className="w-4 h-4" />
               {address?.slice(0, 6)}...{address?.slice(-4)}
             </Button>
@@ -245,7 +245,7 @@ const Header = () => {
               <Wallet className="w-4 h-4" />
               Kết nối ví
             </Button>
-          )} */}
+          )}
           {!user && (
             <Button
               variant="nav"

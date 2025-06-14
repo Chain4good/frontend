@@ -76,7 +76,6 @@ export const formatNumber = (value) => {
   return parseFloat(value).toLocaleString("vi-VN");
 };
 
-// Update formattedDonors to accept campaignTokenAddress
 export const formattedDonors = (donors, campaignTokenAddress) => {
   return donors.map((donor, index) => {
     const tokenInfo = getTokenInfo(campaignTokenAddress);
@@ -85,7 +84,7 @@ export const formattedDonors = (donors, campaignTokenAddress) => {
     return {
       index: index + 1,
       address: donor[0],
-      short: `${donor[0].slice(0, 6)}...${donor[0].slice(-4)}`,
+      short: `${donor[0].slice(0, 12)}...${donor[0].slice(-8)}`,
       totalAmount: {
         wei: donor[1].toString(),
         formatted: formatNumber(Number(donor[1]) / divisor),

@@ -1,6 +1,5 @@
 const ProgressBar = ({ value, max, symbol }) => {
   const percentage = (value / max) * 100 > 100 ? 100 : (value / max) * 100;
-  console.log(percentage);
 
   return (
     <div className="w-full">

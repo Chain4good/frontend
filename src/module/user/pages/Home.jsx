@@ -15,13 +15,11 @@ export default function Home() {
     limit: 4,
   });
   const { data: posts, isLoading } = usePost(filters);
-  const { data: recommendationsData } = useQuery({
-    queryKey: ["recommendations"],
-    queryFn: () => recommendations(),
-    enabled: true,
-  });
-
-  console.log(recommendationsData);
+  // const { data: recommendationsData } = useQuery({
+  //   queryKey: ["recommendations"],
+  //   queryFn: () => recommendations(),
+  //   enabled: true,
+  // });
 
   return (
     <>

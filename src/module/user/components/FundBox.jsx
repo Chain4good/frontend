@@ -61,7 +61,6 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
 
     try {
       setIsLoading(true);
-      console.log(selectedToken);
 
       if (selectedToken === "ETH") {
         const { txHash } = await donateETH(
@@ -288,7 +287,7 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-2" id="donors">
+      <div className="grid grid-cols-1 gap-4" id="donors">
         {isDonorsLoading ? (
           <div className="animate-pulse space-y-4">
             {[1, 2, 3].map((i) => (

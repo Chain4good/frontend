@@ -20,7 +20,6 @@ const CreateLayout = () => {
     mutationFn: createCampaign,
     onSuccess: (data) => {
       toast.success("Chiến dịch tạo thành công!");
-      console.log(data);
     },
     onError: (error) => {
       toast.error(error.message);

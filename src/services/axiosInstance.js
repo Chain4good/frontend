@@ -35,17 +35,30 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Helper function to extract error data
+    const getErrorData = (error) => {
+      const response = error?.response?.data;
+      if (typeof response === "object") {
+        return response;
+      }
+      return {
+        message: typeof response === "string" ? response : "Có lỗi xảy ra",
+        status: error?.response?.status,
+        error: true,
+      };
+    };
+
     if (error?.response?.status === 401 && !originalRequest._retry) {
+      if (originalRequest.url === "/auth/login") {
+        return Promise.reject(getErrorData(error));
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then(() => {
-            return instance(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
+          .then(() => instance(originalRequest))
+          .catch((err) => Promise.reject(getErrorData(err)));
       }
 
       originalRequest._retry = true;
@@ -60,11 +73,12 @@ instance.interceptors.response.use(
         processQueue(refreshError, null);
         isRefreshing = false;
         Cookies.remove("access_token");
-        window.location.href = "/login";
-        return Promise.reject(refreshError);
+        window.location.href = "/sign-in";
+        return Promise.reject(getErrorData(refreshError));
       }
     }
-    return Promise.reject(error);
+
+    return Promise.reject(getErrorData(error));
   }
 );
 

@@ -68,7 +68,13 @@ const MyCampaigns = () => {
         return;
       }
 
-      const durationInMinutes = Math.floor((deadline - now) / (1000 * 60));
+      const durationInSeconds = Math.floor((deadline - now) / 1000);
+
+      const maxDurationSeconds = 365 * 24 * 60 * 60; // 1 năm
+      if (durationInSeconds > maxDurationSeconds) {
+        toast.error("Thời gian chiến dịch không được vượt quá 1 năm");
+        return;
+      }
 
       // Get token details using passed selectedToken
       const token = TOKEN[selectedToken];
@@ -92,7 +98,7 @@ const MyCampaigns = () => {
         campaign.title,
         tokenAddress,
         goalInWei.toString(),
-        Math.floor(durationInMinutes),
+        durationInSeconds,
         campaign.isNoLimit
       );
 
@@ -110,6 +116,13 @@ const MyCampaigns = () => {
       toast.success("Hợp đồng đã được tạo thành công!");
     } catch (error) {
       console.error("Error creating contract:", error);
+
+      if (error.reason === "Duration too long") {
+        toast.error(
+          "Thời gian chiến dịch quá dài. Vui lòng chọn thời gian ngắn hơn."
+        );
+        return;
+      }
 
       if (error.code === "ACTION_REJECTED") {
         toast.error("Bạn đã từ chối ký giao dịch");

@@ -31,11 +31,18 @@ import ReportCampaignButton from "@/components/ReportCampaignButton";
 import CreateProgressDialog from "../components/CreateProgressDialog";
 import ProgressList from "../components/ProgressList";
 import useUserStore from "@/hooks/useUserStore";
+import Forbidden from "../components/Forbidden";
 
 const Fund = () => {
   const { id } = useParams();
-  const { getCampaign, getDonors, listenToFundsWithdrawn, getCampaignStatus } =
-    useCharityDonation();
+  const {
+    getCampaign,
+    getDonors,
+    listenToFundsWithdrawn,
+    getCampaignStatus,
+    listenToDonationMade,
+    getCampaignCloseHistory,
+  } = useCharityDonation();
   const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
@@ -49,6 +56,7 @@ const Fund = () => {
   } = useQuery({
     queryKey: ["campaign", id],
     queryFn: () => getCampaignById(id),
+
     enabled: !!id,
   });
 
@@ -60,6 +68,8 @@ const Fund = () => {
     queryKey: ["campaignOnChain", campaign?.chainCampaignId],
     queryFn: async () => {
       const data = await getCampaign(campaign.chainCampaignId);
+      console.log("data", data);
+
       return formatCampaign(data);
     },
     enabled: !!campaign?.chainCampaignId,
@@ -69,13 +79,28 @@ const Fund = () => {
     queryKey: ["donors", campaign?.chainCampaignId],
     queryFn: async () => {
       const data = await getDonors(campaign.chainCampaignId);
-      // Pass campaign token address to formattedDonors
-      console.log(formattedDonors(data, onChainCampaign?.tokenAddress));
-
       return formattedDonors(data, onChainCampaign?.tokenAddress);
     },
     enabled: !!campaign?.chainCampaignId,
   });
+
+  const { data: closeHistory, isLoading: isCloseHistoryLoading } = useQuery({
+    queryKey: ["campaignCloseHistory", campaign?.chainCampaignId],
+    queryFn: async () => {
+      try {
+        const history = await getCampaignCloseHistory(campaign.chainCampaignId);
+        return history;
+      } catch (error) {
+        if (error?.code === 4100) {
+          throw new Error("Vui lòng kết nối ví để xem thông tin này");
+        }
+        throw error;
+      }
+    },
+    enabled: !!campaign?.chainCampaignId,
+    retry: false, // Don't retry on error
+  });
+  console.log(closeHistory);
 
   useEffect(() => {
     let cleanupFunction;
@@ -102,7 +127,40 @@ const Fund = () => {
     };
   }, [campaign?.chainCampaignId, id, listenToFundsWithdrawn]);
 
-  console.log("onChainCampaign:", onChainCampaign);
+  useEffect(() => {
+    let cleanupFunction;
+
+    const setupListener = async () => {
+      if (campaign?.chainCampaignId) {
+        try {
+          cleanupFunction = await listenToDonationMade(
+            campaign.chainCampaignId,
+            () => {
+              queryClient.invalidateQueries([
+                "campaignOnChain",
+                campaign.chainCampaignId,
+              ]);
+              queryClient.invalidateQueries([
+                "donors",
+                campaign.chainCampaignId,
+              ]);
+              queryClient.invalidateQueries(["donationHistory", id]);
+            }
+          );
+        } catch (error) {
+          console.error("Error setting up event listener:", error);
+        }
+      }
+    };
+
+    setupListener();
+
+    return () => {
+      if (typeof cleanupFunction === "function") {
+        cleanupFunction();
+      }
+    };
+  }, [campaign?.chainCampaignId, id, listenToDonationMade, queryClient]);
 
   useEffect(() => {
     const fetchCampaignStatus = async () => {
@@ -116,17 +174,12 @@ const Fund = () => {
           remainingTime: Number(remainingTime),
         });
 
-        const now = new Date();
-        const deadline = new Date(campaign.deadline);
-        const hasReachedGoal =
-          onChainCampaign?.totalDonated.raw >= onChainCampaign?.goal.raw;
-
-        if (now >= deadline || hasReachedGoal) {
-          if (!isActive && isSuccessful) {
+        if (!isActive) {
+          if (isSuccessful) {
             updateCampaign(campaign.id, {
               status: "FINISHED",
             });
-          } else if (!isActive && !isSuccessful) {
+          } else {
             updateCampaign(campaign.id, {
               status: "CANCELLED",
             });
@@ -166,7 +219,6 @@ const Fund = () => {
     mutationFn: analyzeCampaign,
     onSuccess: (data) => {
       setAnalysisResult(data);
-      console.log("Analysis complete:", data);
     },
     onError: (error) => {
       console.error("Analysis failed:", error);
@@ -202,7 +254,6 @@ const Fund = () => {
     queryFn: () => getDonationHistory(id),
     enabled: !!id,
   });
-
   return (
     <>
       <Helmet>
@@ -239,7 +290,7 @@ const Fund = () => {
 
       <div className="container py-6 md:py-10 px-4 md:px-6">
         {isLoading && <FundSkeleton />}
-        {error && <div>Error: {error.message}</div>}
+        {error && error?.statusCode === 403 && <Forbidden />}
         {campaign && (
           <>
             <FundHeader campaign={campaign} />

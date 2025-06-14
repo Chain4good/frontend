@@ -12,10 +12,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { signin } from "@/services/authService";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import useUserStore from "@/hooks/useUserStore";
+
 const formSchema = z.object({
   email: z.string().email({ message: "Email không hợp lệ" }),
   password: z.string().min(6, { message: "Mật khẩu ít nhất 6 ký tự" }),
 });
+
 const SignInPage = () => {
   const navigate = useNavigate();
   const {
@@ -28,16 +32,17 @@ const SignInPage = () => {
 
   const mutation = useMutation({
     mutationFn: (data) => signin(data),
-    onSuccess: () => {
+    onSuccess: ({ data }) => {
       toast.success("Đăng nhập thành công!");
       navigate("/");
     },
     onError: (error) => {
-      toast.error(error.message || "Có lỗi xảy ra!");
+      console.log(error);
+      toast.error(error.message?.message || "Đăng nhập không thành cóng!");
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     mutation.mutate(data);
   };
 
@@ -113,7 +118,14 @@ const SignInPage = () => {
           </div>
           <div className="mt-2">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang đăng nhập...
+                </div>
+              ) : (
+                "Đăng nhập"
+              )}
             </Button>
           </div>
         </form>

@@ -4,8 +4,10 @@ import CharityDonationABI from "../contracts/abi/CharityDonation.json";
 import { updateCampaign } from "@/services/campaignService"; // Add this import
 
 // const CONTRACT_ADDRESS = "0x02f0913C80fAab95154555f9Af6D97dD5e50B5b6";
-const CONTRACT_ADDRESS = "0xF5407c6152824f6D2b073e6cBc7e03D1CE6D54eA";
+// const CONTRACT_ADDRESS = "0xF5407c6152824f6D2b073e6cBc7e03D1CE6D54eA";
+const CONTRACT_ADDRESS = "0xa0A6fB7ef8A68E24e6D0C400e5b731D80BAD97bD";
 // 0xF5407c6152824f6D2b073e6cBc7e03D1CE6D54eA
+// new: `0xa0A6fB7ef8A68E24e6D0C400e5b731D80BAD97bD`
 
 export const TOKEN = {
   USDC: {
@@ -57,15 +59,32 @@ export const TOKEN = {
 
 export const useCharityDonation = () => {
   const getContract = async () => {
-    if (!window.ethereum) throw new Error("MetaMask not installed");
+    if (!window.ethereum) {
+      throw new Error("MetaMask chưa được cài đặt");
+    }
 
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    return new ethers.Contract(
-      CONTRACT_ADDRESS,
-      CharityDonationABI.abi,
-      signer
-    );
+    try {
+      // Request account access explicitly
+      await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      return new ethers.Contract(
+        CONTRACT_ADDRESS,
+        CharityDonationABI.abi,
+        signer
+      );
+    } catch (error) {
+      if (error.code === 4001) {
+        throw new Error("Người dùng từ chối kết nối ví");
+      }
+      if (error.code === 4100) {
+        throw new Error("Vui lòng kết nối ví MetaMask trước");
+      }
+      throw error;
+    }
   };
 
   return useMemo(
@@ -171,18 +190,10 @@ export const useCharityDonation = () => {
 
       donateToken: async (campaignId, tokenAddress, amount, decimals = 18) => {
         try {
-          console.log("Starting token donation:", {
-            campaignId,
-            tokenAddress,
-            amount,
-            decimals,
-          });
-
           const provider = new ethers.BrowserProvider(window.ethereum);
           const signer = await provider.getSigner();
           const userAddress = await signer.getAddress();
 
-          // Initialize token contract with full interface
           const tokenContract = new ethers.Contract(
             tokenAddress,
             [
@@ -221,14 +232,9 @@ export const useCharityDonation = () => {
             userAddress,
             CONTRACT_ADDRESS
           );
-          console.log(
-            "Current allowance:",
-            ethers.formatUnits(currentAllowance, decimals)
-          );
 
           // If allowance is insufficient, approve
           if (currentAllowance < parsedAmount) {
-            console.log("Approving tokens...");
             const approveTx = await tokenContract.approve(
               CONTRACT_ADDRESS,
               parsedAmount
@@ -238,9 +244,7 @@ export const useCharityDonation = () => {
             if (!approveReceipt.status) {
               throw new Error("Token approval failed");
             }
-            console.log("Token approval confirmed:", approveReceipt.hash);
 
-            // Verify the new allowance
             const newAllowance = await tokenContract.allowance(
               userAddress,
               CONTRACT_ADDRESS
@@ -252,12 +256,10 @@ export const useCharityDonation = () => {
 
           // Execute donation
           const contract = await getContract();
-          console.log("Executing donation...");
           const tx = await contract.donate(campaignId, parsedAmount, {
-            gasLimit: 300000, // Set explicit gas limit
+            gasLimit: 300000,
           });
 
-          console.log("Waiting for confirmation...");
           const receipt = await tx.wait();
 
           if (!receipt.status) {
@@ -342,7 +344,105 @@ export const useCharityDonation = () => {
           contract.off("FundsWithdrawn");
         };
       },
+      getCampaignCloseHistory: async (campaignId) => {
+        try {
+          const contract = await getContract();
+          const accounts = await window.ethereum.request({
+            method: "eth_accounts",
+          });
+          if (!accounts || accounts.length === 0) {
+            throw new Error("Vui lòng kết nối ví để xem thông tin này");
+          }
+
+          const history = await contract.getCampaignCloseHistory(campaignId);
+          return {
+            isClosed: history[0],
+            closeReason: history[1],
+            goalReached: history[2],
+            totalRaised: history[3],
+          };
+        } catch (error) {
+          console.error("Get campaign close history error:", error);
+          throw error;
+        }
+      },
+
+      getDonorInfo: async (campaignId, donorAddress) => {
+        try {
+          const contract = await getContract();
+          const info = await contract.getDonorInfo(campaignId, donorAddress);
+          return {
+            totalAmount: info[0],
+            donationCount: info[1],
+            lastDonationTime: info[2],
+          };
+        } catch (error) {
+          console.error("Get donor info error:", error);
+          throw error;
+        }
+      },
+
+      closeCampaign: async (campaignId) => {
+        try {
+          const contract = await getContract();
+          const tx = await contract.closeCampaign(campaignId);
+          const receipt = await tx.wait();
+          return {
+            txHash: tx.hash,
+            receipt,
+          };
+        } catch (error) {
+          console.error("Close campaign error:", error);
+          if (error.code === "ACTION_REJECTED") {
+            throw new Error("Người dùng từ chối giao dịch");
+          }
+          throw error;
+        }
+      },
+
+      listenToCampaignClosed: async (campaignId, dbCampaignId) => {
+        const contract = await getContract();
+
+        contract.on("CampaignClosed", async (_campaignId, reachedGoal) => {
+          console.log("CampaignClosed event:", {
+            campaignId: Number(_campaignId),
+            reachedGoal,
+          });
+
+          try {
+            await updateCampaign(dbCampaignId, {
+              status: reachedGoal ? "FINISHED" : "CANCELLED",
+            });
+          } catch (error) {
+            console.error("Error updating campaign status:", error);
+          }
+        });
+
+        return () => {
+          contract.off("CampaignClosed");
+        };
+      },
+      listenToDonationMade: async (campaignId, callback) => {
+        const contract = await getContract();
+
+        contract.on("DonationMade", async (_campaignId, donor, amount) => {
+          console.log("DonationMade event:", {
+            campaignId: Number(_campaignId),
+            donor,
+            amount: amount.toString(),
+          });
+
+          if (Number(_campaignId) === Number(campaignId) && callback) {
+            callback();
+          }
+        });
+
+        return () => {
+          contract.off("DonationMade");
+        };
+      },
     }),
+
     []
   );
 };

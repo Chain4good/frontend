@@ -18,8 +18,6 @@ export const useSocket = () => {
     });
 
     socketInstance.on("connect", () => {
-      console.log("Connected to socket server");
-
       if (user?.id) {
         socketInstance.emit("join", user.id);
       }
