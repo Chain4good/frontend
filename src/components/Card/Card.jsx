@@ -12,7 +12,6 @@ import { truncate } from "lodash";
 import { TOKEN } from "@/hooks/useCharityDonation"; // Thêm import TOKEN
 
 const Card = ({ campaign, size, titleMaxLength }) => {
-  // Thêm hàm để lấy token info
   const getTokenInfo = (tokenAddress) => {
     if (!tokenAddress) return null;
 
@@ -54,7 +53,7 @@ const Card = ({ campaign, size, titleMaxLength }) => {
     );
   };
   return (
-    <Link to={`/fund/${campaign?.id}`} className="flex flex-col">
+    <Link to={`/fund/${campaign?.id}`} className="flex flex-col h-full">
       <div className="relative rounded-lg flex-1 overflow-hidden">
         {renderMedia()}
         <span className="absolute left-2 bottom-2 px-4 py-1 bg-slate-900 bg-opacity-80 text-white rounded-full flex items-center gap-2">

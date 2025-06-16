@@ -253,6 +253,32 @@ const Profile = () => {
                         Email đã xác minh
                       </Badge>
                     )}
+                    {user?.UserBadge?.map((userBadge) => (
+                      <Badge
+                        key={userBadge.id}
+                        variant="secondary"
+                        className="gap-1"
+                      >
+                        <img
+                          src={userBadge.badge.iconUrl}
+                          alt={userBadge.badge.name}
+                          className="h-3 w-3"
+                        />
+                        {userBadge.badge.name}
+                        <span
+                          className="ml-1 text-xs opacity-75"
+                          title={`Được trao ngày ${new Date(
+                            userBadge.awardedAt
+                          ).toLocaleDateString("vi-VN")}`}
+                        >
+                          (
+                          {new Date(userBadge.awardedAt).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                          )
+                        </span>
+                      </Badge>
+                    ))}
                   </div>
                 </div>
                 <EditProfileForm

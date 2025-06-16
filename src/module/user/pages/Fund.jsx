@@ -1,37 +1,34 @@
-import { Separator } from "@/components/ui/separator";
-import FundSkeleton from "@/components/FundSkeleton";
-import ReadMore from "@/components/ReadMore/ReadMore";
 import AnalysisResult from "@/components/AnalysisResult";
 import AnalyzeButton from "@/components/AnalyzeButton";
 import DonationChart from "@/components/DonationChart";
-import { Helmet } from "react-helmet-async";
-import FundHeader from "../components/Fund/FundHeader";
-import FundMedia from "../components/Fund/FundMedia";
-import FundCreator from "../components/Fund/FundCreator";
-import FundGallery from "../components/Fund/FundGallery";
-import CommentBox from "../components/CommentBox";
-import FundBox from "../components/FundBox";
-import ShareModal from "../components/ShareModal";
-import { CampaignStatus } from "@/constants/status";
+import FundSkeleton from "@/components/FundSkeleton";
+import ReadMore from "@/components/ReadMore/ReadMore";
+import ReportCampaignButton from "@/components/ReportCampaignButton";
+import { Separator } from "@/components/ui/separator";
 import { useCharityDonation } from "@/hooks/useCharityDonation";
+import useUserStore from "@/hooks/useUserStore";
 import { formatCampaign, formattedDonors } from "@/lib/utils";
+import { analyzeCampaign } from "@/services/aiService";
 import { getCampaignById, updateCampaign } from "@/services/campaignService";
 import {
   createComment,
   getCommentsByCampaign,
 } from "@/services/commentService";
-import { analyzeCampaign } from "@/services/aiService";
-import { AvatarImage } from "@radix-ui/react-avatar";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, Link2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
 import { getDonationHistory } from "@/services/donationService";
-import ReportCampaignButton from "@/components/ReportCampaignButton";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useParams } from "react-router-dom";
+import CommentBox from "../components/CommentBox";
 import CreateProgressDialog from "../components/CreateProgressDialog";
-import ProgressList from "../components/ProgressList";
-import useUserStore from "@/hooks/useUserStore";
 import Forbidden from "../components/Forbidden";
+import FundCreator from "../components/Fund/FundCreator";
+import FundGallery from "../components/Fund/FundGallery";
+import FundHeader from "../components/Fund/FundHeader";
+import FundMedia from "../components/Fund/FundMedia";
+import FundBox from "../components/FundBox";
+import ProgressList from "../components/ProgressList";
+import ShareModal from "../components/ShareModal";
 
 const Fund = () => {
   const { id } = useParams();

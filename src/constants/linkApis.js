@@ -67,6 +67,7 @@ export const CommentV1 = {
   UPDATE_COMMENT: "/comments",
   DELETE_COMMENT: "/comments",
   GET_COMMENT_BY_CAMPAIGN: "/comments/campaign",
+  LIKE_COMMENT: "/comments/",
 };
 
 export const UserV1 = {

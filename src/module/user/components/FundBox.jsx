@@ -72,6 +72,7 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
           amount: Number(amount),
           txHash: txHash,
           token: "ETH",
+          tokenName: "ethereum",
         });
       } else {
         const token = TOKEN[selectedToken];
@@ -86,6 +87,7 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
           amount: Number(amount),
           txHash: txHash,
           token: selectedToken,
+          tokenName: token.tokenName,
         });
       }
 

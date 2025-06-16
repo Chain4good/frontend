@@ -8,6 +8,7 @@ import { usePost } from "@/hooks/usePost";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { recommendations } from "@/services/aiService";
+import HowWork from "../components/HowWork";
 
 export default function Home() {
   const [filters, setFilters] = useState({
@@ -49,6 +50,7 @@ export default function Home() {
           <Discover />
         </div>
         <Topic posts={posts} />
+        <HowWork />
       </main>
     </>
   );

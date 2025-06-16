@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import "./editor.css"; // Tạo file CSS riêng
+import "./editor.css";
 import useCampaign from "@/hooks/useCampaign";
 import { useLocation } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -19,9 +19,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { optimizeCampaign } from "@/services/aiService";
-import { uploadFile } from "@/services/uploadService"; // Tạo service này để xử lý upload
+import { uploadFile } from "@/services/uploadService";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Description = () => {
   const { newCampaign, changeCampaignValue } = useCampaign();
@@ -61,10 +62,10 @@ const Description = () => {
     }
   };
 
-  // Thêm các hàm xử lý upload
   function uploadAdapter(loader) {
     return {
       upload: () => {
+        // eslint-disable-next-line no-async-promise-executor
         return new Promise(async (resolve, reject) => {
           try {
             const file = await loader.file;
@@ -96,93 +97,137 @@ const Description = () => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
       <div>
         <h2 className="font-semibold text-xl">Chi tiết chiến dịch gây quỹ</h2>
         <p className="text-muted-foreground">
           Hãy mô tả chi tiết về mục đích và kế hoạch sử dụng quỹ của bạn
         </p>
       </div>
-      <div>
-        <Label className="pb-1">Tiêu đề</Label>
-        <Input
-          size="lg"
-          placeholder="Tiêu đề"
-          value={newCampaign.title}
-          onChange={(e) => changeCampaignValue("title", e.target.value)}
-        />
-      </div>
-      <div>
-        <Label className="pb-1">Mô tả</Label>
-        <CKEditor
-          editor={ClassicEditor}
-          data={newCampaign.description}
-          onChange={(event, editor) => {
-            const data = editor.getData();
-            changeCampaignValue("description", data);
-          }}
-          config={{
-            extraPlugins: [uploadPlugin], // Thêm plugin upload
-            toolbar: {
-              items: [
-                "heading",
-                "|",
-                "bold",
-                "italic",
-                "link",
-                "bulletedList",
-                "numberedList",
-                "|",
-                "uploadImage", // Thêm nút upload ảnh
-                "mediaEmbed",
-                "|",
-                "outdent",
-                "indent",
-                "|",
-                "blockQuote",
-                "insertTable",
-                "undo",
-                "redo",
-              ],
-              shouldNotGroupWhenFull: true,
-            },
-            image: {
-              toolbar: [
-                "imageStyle:inline",
-                "imageStyle:block",
-                "imageStyle:side",
-                "|",
-                "toggleImageCaption",
-                "imageTextAlternative",
-              ],
-              upload: {
-                types: ["jpeg", "png", "gif", "webp"],
-              },
-            },
-            placeholder: "Nhập nội dung mô tả chi tiết...",
-            heading: {
-              options: [
-                {
-                  model: "paragraph",
-                  title: "Paragraph",
-                  class: "ck-heading_paragraph",
+
+      <Tabs defaultValue="edit" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="edit">Chỉnh sửa</TabsTrigger>
+          <TabsTrigger value="preview">Xem trước</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="edit" className="space-y-6">
+          <div>
+            <Label className="pb-1">Tiêu đề</Label>
+            <Input
+              size="lg"
+              placeholder="Tiêu đề"
+              value={newCampaign.title}
+              onChange={(e) => changeCampaignValue("title", e.target.value)}
+            />
+          </div>
+          <div>
+            <Label className="pb-1">Mô tả</Label>
+            <CKEditor
+              editor={ClassicEditor}
+              data={newCampaign.description}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                changeCampaignValue("description", data);
+              }}
+              config={{
+                extraPlugins: [uploadPlugin], // Thêm plugin upload
+                toolbar: {
+                  items: [
+                    "heading",
+                    "|",
+                    "bold",
+                    "italic",
+                    "link",
+                    "bulletedList",
+                    "numberedList",
+                    "|",
+                    "uploadImage", // Thêm nút upload ảnh
+                    "mediaEmbed",
+                    "|",
+                    "outdent",
+                    "indent",
+                    "|",
+                    "blockQuote",
+                    "insertTable",
+                    "undo",
+                    "redo",
+                  ],
+                  shouldNotGroupWhenFull: true,
                 },
-                {
-                  model: "heading1",
-                  view: "h1",
-                  title: "Heading 1",
-                  class: "ck-heading_heading1",
+                image: {
+                  toolbar: [
+                    "imageStyle:inline",
+                    "imageStyle:block",
+                    "imageStyle:side",
+                    "|",
+                    "toggleImageCaption",
+                    "imageTextAlternative",
+                  ],
+                  upload: {
+                    types: ["jpeg", "png", "gif", "webp"],
+                  },
                 },
-                {
-                  model: "heading2",
-                  view: "h2",
-                  title: "Heading 2",
-                  class: "ck-heading_heading2",
+                placeholder: "Nhập nội dung mô tả chi tiết...",
+                heading: {
+                  options: [
+                    {
+                      model: "paragraph",
+                      title: "Paragraph",
+                      class: "ck-heading_paragraph",
+                    },
+                    {
+                      model: "heading1",
+                      view: "h1",
+                      title: "Heading 1",
+                      class: "ck-heading_heading1",
+                    },
+                    {
+                      model: "heading2",
+                      view: "h2",
+                      title: "Heading 2",
+                      class: "ck-heading_heading2",
+                    },
+                  ],
                 },
-              ],
-            },
-          }}
-        />
-      </div>
+              }}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="preview" className="space-y-6">
+          <div className="rounded-lg border p-6 space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Tiêu đề</h3>
+              <div className="prose max-w-none">
+                {newCampaign.title || (
+                  <p className="text-muted-foreground italic">
+                    Chưa có tiêu đề...
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
+              <div className="prose max-w-none">
+                {newCampaign.description ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: newCampaign.description,
+                    }}
+                  />
+                ) : (
+                  <p className="text-muted-foreground italic">
+                    Chưa có nội dung mô tả...
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
       <div className="flex justify-end mt-4">
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogTrigger asChild>
