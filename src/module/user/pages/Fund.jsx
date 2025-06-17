@@ -29,6 +29,8 @@ import FundMedia from "../components/Fund/FundMedia";
 import FundBox from "../components/FundBox";
 import ProgressList from "../components/ProgressList";
 import ShareModal from "../components/ShareModal";
+import GenerateAudioButton from "@/components/GenerateAudioButton";
+import AudioPlayer from "../components/AudioPlayer";
 
 const Fund = () => {
   const { id } = useParams();
@@ -307,10 +309,15 @@ const Fund = () => {
 
                 <Separator className="my-6 md:my-8" />
                 <div className="mb-6">
-                  <AnalyzeButton
-                    onClick={handleAnalyzeCampaign}
-                    isAnalyzing={isAnalyzing}
-                  />
+                  <div className="flex gap-2">
+                    <AnalyzeButton
+                      onClick={handleAnalyzeCampaign}
+                      isAnalyzing={isAnalyzing}
+                    />
+                    {!campaign.audio && (
+                      <GenerateAudioButton campaignId={campaign.id} />
+                    )}
+                  </div>
                   {(analysisResult || isAnalyzing) && (
                     <AnalysisResult
                       analysis={analysisResult}
@@ -320,6 +327,14 @@ const Fund = () => {
                 </div>
 
                 <Separator />
+                {campaign?.audio && (
+                  <>
+                    <Separator className="my-6 md:my-8" />
+                    <div className="mt-4 md:mt-6">
+                      <AudioPlayer audioUrl={campaign.audio} />
+                    </div>
+                  </>
+                )}
                 <ReadMore
                   className="text-base md:text-lg mt-4 md:mt-6"
                   text={campaign?.description}

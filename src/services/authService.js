@@ -65,3 +65,16 @@ export const resendVerificationEmail = async () => {
   });
   return response;
 };
+
+export const loginWithWeb3 = async (address, signature) => {
+  const url = queryString.stringifyUrl({
+    url: AuthV1.WEB3_LOGIN,
+  });
+  const response = await requestInstance.post(url, {
+    address,
+    signature,
+  });
+  const userStore = useUserStore.getState();
+  userStore.setUserData(response.data.data);
+  return response;
+};

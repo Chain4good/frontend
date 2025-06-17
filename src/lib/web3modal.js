@@ -19,7 +19,7 @@ createWeb3Modal({
   chains,
   themeMode: "light",
   themeVariables: {
-    "--w3m-accent": "rgb(34 197 94)", // Màu primary của bạn
+    "--w3m-accent": "rgb(34 197 94)",
   },
 });
 

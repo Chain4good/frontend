@@ -12,8 +12,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { signin } from "@/services/authService";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wallet } from "lucide-react";
 import useUserStore from "@/hooks/useUserStore";
+import { useWallet } from "@/hooks/useWallet";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Email không hợp lệ" }),
@@ -22,6 +23,7 @@ const formSchema = z.object({
 
 const SignInPage = () => {
   const navigate = useNavigate();
+  const { handleWeb3Login, isConnected } = useWallet();
   const {
     register,
     handleSubmit,
@@ -46,6 +48,14 @@ const SignInPage = () => {
     mutation.mutate(data);
   };
 
+  const handleLoginWithGoogle = () => {
+    window.location.href = "http://localhost:3000/auth/google";
+  };
+
+  const handleLoginWithFacebook = () => {
+    window.location.href = "http://localhost:3000/auth/facebook";
+  };
+
   return (
     <div
       className="flex w-screen h-screen items-center justify-center"
@@ -59,28 +69,44 @@ const SignInPage = () => {
           <div className="text-xl font-semibold">Welcome</div>
           <p>Đăng nhập vào Chain4Good hoặc đăng ký để tiếp tục.</p>
         </div>
-        {/* <div className="space-y-2">
-          <Button variant={"outline"} className="w-full">
-            <GoogleIconSvg
-              style={{
-                fontSize: "20px",
-                width: "22px",
-                height: "22px",
-              }}
-            />
-            Đăng nhập với Google
+        <div className="w-full space-y-3">
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full h-11 font-medium bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 border-primary/20 hover:border-primary/30 transition-all duration-300"
+            onClick={() => handleWeb3Login()}
+          >
+            <div className="flex items-center justify-center gap-3">
+              <Wallet className="h-5 w-5 text-primary" strokeWidth={2} />
+              <span className="text-sm">
+                {isConnected ? "Đăng nhập bằng ví" : "Kết nối với ví"}
+              </span>
+            </div>
           </Button>
-          <Button variant={"outline"} className="w-full">
-            <FacebookSvg
-              style={{
-                fontSize: "20px",
-                width: "22px",
-                height: "22px",
-              }}
-            />
-            Đăng nhập với Facebook
-          </Button>
-        </div> */}
+
+          {/* Social Logins */}
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-11 flex items-center justify-center gap-3"
+              onClick={handleLoginWithGoogle}
+            >
+              <GoogleIconSvg className="h-5 w-5" />
+              <span>Đăng nhập với Google</span>
+            </Button>
+
+            {/* <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-11 flex items-center justify-center gap-3"
+              onClick={handleLoginWithFacebook}
+            >
+              <FacebookSvg className="h-5 w-5" />
+              <span>Đăng nhập với Facebook</span>
+            </Button> */}
+          </div>
+        </div>
         <Separator />
         <form
           onSubmit={handleSubmit(onSubmit)}

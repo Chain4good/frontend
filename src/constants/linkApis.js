@@ -5,6 +5,7 @@ export const AuthV1 = {
   LOGOUT: "/auth/logout",
   VERIFY_EMAIL: "/auth/verify-email",
   RESEND_VERIFICATION_EMAIL: "/auth/resend-otp",
+  WEB3_LOGIN: "/auth/web3-login",
 };
 
 export const CategoryV1 = {
@@ -82,6 +83,7 @@ export const AiV1 = {
   AI_ANALYZE_CAMPAIGN: "/ai/analyze-campaign-gemini",
   AI_OPTIMIZE_CAMPAIGN: "/ai/optimize-campaign",
   AI_RECOMMENDATIONS: "/ai/recommendations",
+  AI_CAMPAIGN_AUDIO: "/ai/campaigns/",
 };
 
 export const NotificationV1 = {

@@ -24,3 +24,11 @@ export const recommendations = async () => {
   const { data } = await requestInstance.get(url);
   return data;
 };
+
+export const generateCampaignAudio = async (campaignId) => {
+  const url = queryString.stringifyUrl({
+    url: AiV1.AI_CAMPAIGN_AUDIO + campaignId + "/audio",
+  });
+  const { data } = await requestInstance.get(url);
+  return data;
+};

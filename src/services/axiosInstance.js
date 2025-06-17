@@ -18,7 +18,6 @@ const processQueue = (error, token = null) => {
 const instance = axios.create({
   baseURL:
     import.meta.env.VITE_APP_BACKEND_URL || "https://api.chain4good.io.vn",
-  timeout: 120000,
   withCredentials: true,
 });
 

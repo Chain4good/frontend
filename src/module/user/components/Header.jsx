@@ -38,7 +38,8 @@ import { useWallet } from "@/hooks/useWallet";
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { unreadCount } = useNotification();
-  const { address, isConnected, connect, disconnect } = useWallet();
+  const { address, isConnected, connect, disconnect, handleWeb3Login } =
+    useWallet();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -233,8 +234,17 @@ const Header = () => {
         </div>
 
         {/* Right section */}
-        <div className="flex-1 hidden md:flex gap-2 items-center justify-end">
-          {/* <MetaMaskAccount /> */}
+        <div className="flex-1 hidden md:flex items-center justify-end gap-2">
+          {/* Campaign creation button */}
+          <Button
+            className="font-semibold rounded-full text-sm md:text-base"
+            variant={""}
+            onClick={() => handleNaivigation("/create/fundraiser/category")}
+          >
+            <span>Bắt đầu chiến dịch</span>
+          </Button>
+
+          {/* Wallet connection */}
           {isConnected ? (
             <Button variant="outline" className="gap-2" onClick={disconnect}>
               <Wallet className="w-4 h-4" />
@@ -246,25 +256,24 @@ const Header = () => {
               Kết nối ví
             </Button>
           )}
+
+          {/* Authentication buttons */}
           {!user && (
-            <Button
-              variant="nav"
-              className="flex gap-1"
-              onClick={() => handleNaivigation("/sign-in")}
-            >
-              <span>Đăng nhập</span>
-            </Button>
+            <>
+              <Button
+                variant="nav"
+                className="flex gap-1"
+                onClick={() => handleNaivigation("/sign-in")}
+              >
+                <span>Đăng nhập</span>
+              </Button>
+            </>
           )}
-          <Button
-            className="font-semibold rounded-full text-sm md:text-base"
-            variant={""}
-            onClick={() => handleNaivigation("/create/fundraiser/category")}
-          >
-            <span>Bắt đầu chiến dịch</span>
-          </Button>
-          <div>
-            <NotificationList />
-          </div>
+
+          {/* Notifications */}
+          <NotificationList />
+
+          {/* User menu */}
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger>
