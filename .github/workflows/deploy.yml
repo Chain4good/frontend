@@ -30,13 +30,21 @@ jobs:
           tags: ${{secrets.DOCKER_USERNAME}}/charity-client:latest
 
       - name: Deploy to VPS
+        shell: bash
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '\
-            docker pull ${{secrets.DOCKER_USERNAME}}/charity-client:latest && \
-            docker stop app-container || true && \
-            docker rm app-container || true && \
-              docker run -d \
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} << 'EOF'
+            # Create directory if it doesn't exist
+            mkdir -p /home/${{ secrets.VPS_USERNAME }}
+            # Create and decode env file
+            echo "${{ secrets.ENV_FILE_BASE64 }}" | base64 --decode > /home/${{ secrets.VPS_USERNAME }}/.env
+            # Ensure correct permissions
+            chmod 600 /home/${{ secrets.VPS_USERNAME }}/.env
+            # Docker commands
+            docker pull ${{secrets.DOCKER_USERNAME}}/charity-client:latest
+            docker stop app-container || true
+            docker rm app-container || true
+            docker run -d \
               --name app-container \
               -p 5173:5173 \
-              -e VITE_APP_BACKEND_URL=${{ secrets.BACKEND_URL }} \
-              ${{secrets.DOCKER_USERNAME}}/charity-client:latest'
+              --env-file /home/${{ secrets.VPS_USERNAME }}/.env \
+              ${{secrets.DOCKER_USERNAME}}/charity-client:latest
