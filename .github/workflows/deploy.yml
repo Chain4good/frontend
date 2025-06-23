@@ -13,7 +13,8 @@ jobs:
 
       - name: Decode ENV file
         run: |
-          echo ${{ secrets.ENV_FILE_BASE64 }} | base64 -d > .env
+          echo "${{ secrets.ENV_FILE_BASE64 }}" | base64 --decode > .env
+        shell: bash
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.7.0
