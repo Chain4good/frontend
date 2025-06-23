@@ -8,7 +8,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import DOMPurify from "dompurify";
 import { useState } from "react";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -91,14 +94,59 @@ const CreateProgressDialog = ({ campaignId }) => {
 
           <div className="space-y-2">
             <Label>Nội dung chi tiết</Label>
-            <Textarea
-              value={progress.description}
-              onChange={(e) =>
-                setProgress({ ...progress, description: e.target.value })
-              }
-              placeholder="Mô tả chi tiết về tiến trình..."
-              rows={5}
-            />
+            <Tabs defaultValue="edit" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="edit">Chỉnh sửa</TabsTrigger>
+                <TabsTrigger value="preview">Xem trước</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="edit">
+                <CKEditor
+                  editor={ClassicEditor}
+                  data={progress.description}
+                  onChange={(event, editor) => {
+                    const data = editor.getData();
+                    setProgress({ ...progress, description: data });
+                  }}
+                  config={{
+                    toolbar: {
+                      items: [
+                        "heading",
+                        "|",
+                        "bold",
+                        "italic",
+                        "link",
+                        "bulletedList",
+                        "numberedList",
+                        "|",
+                        "outdent",
+                        "indent",
+                        "|",
+                        "blockQuote",
+                        "insertTable",
+                        "undo",
+                        "redo",
+                      ],
+                    },
+                  }}
+                />
+              </TabsContent>
+
+              <TabsContent value="preview" className="border rounded-lg p-4">
+                {progress.description ? (
+                  <div
+                    className="prose max-w-none"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(progress.description),
+                    }}
+                  />
+                ) : (
+                  <p className="text-muted-foreground italic">
+                    Chưa có nội dung...
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
 
           <div className="space-y-2">

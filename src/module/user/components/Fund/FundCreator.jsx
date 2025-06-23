@@ -6,8 +6,11 @@ const FundCreator = ({ campaign, onChainCampaign }) => {
   return (
     <div className="flex gap-3 md:gap-4 items-center mt-4 pb-4">
       <div className="relative">
-        <Avatar className="h-8 w-8 md:h-10 md:w-10">
-          <AvatarImage src={campaign?.user?.image} />
+        <Avatar className="h-8 w-8 md:h-10 md:w-10 object-cover">
+          <AvatarImage
+            src={campaign?.user?.image}
+            className="object-cover w-full h-full"
+          />
           <AvatarFallback>CG</AvatarFallback>
         </Avatar>
         <div className="absolute -bottom-1 -right-1 flex">
@@ -17,7 +20,7 @@ const FundCreator = ({ campaign, onChainCampaign }) => {
                 <img
                   src={userBadge.badge.iconUrl}
                   alt={userBadge.badge.name}
-                  className="w-4 h-4 md:w-5 md:h-5"
+                  className="w-4 h-4 md:w-5 md:h-5 object-cover"
                   style={{ marginLeft: index > 0 ? "-6px" : "0" }}
                 />
               </Tooltip>

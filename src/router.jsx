@@ -27,6 +27,7 @@ const MyCampaigns = lazy(() => import("./module/user/pages/MyCampaigns"));
 const Profile = lazy(() => import("./module/user/pages/Profile"));
 const Discover = lazy(() => import("./module/user/pages/Discover"));
 const Setting = lazy(() => import("./module/user/pages/Setting"));
+const NFTs = lazy(() => import("./module/user/pages/NFTs"));
 const DiscoverBrowse = lazy(() => import("./module/user/pages/DiscoverBrowse"));
 
 // Loading component
@@ -69,6 +70,7 @@ const router = createBrowserRouter([
       { path: "logout", element: withSuspense(Logout) },
       { path: "discover", element: withSuspense(Discover) },
       { path: "settings", element: withSuspense(Setting) },
+      { path: "nfts", element: withSuspense(NFTs) },
       { path: "discover/:id", element: withSuspense(DiscoverBrowse) },
       { path: "my-campaigns", element: withSuspense(MyCampaigns) },
       { path: "post/:slug", element: withSuspense(Post) },

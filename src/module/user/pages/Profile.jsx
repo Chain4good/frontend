@@ -1,39 +1,23 @@
-import React, { useState } from "react";
-import { Helmet } from "react-helmet-async";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { uploadFile } from "@/services/uploadService";
-import { updateUser } from "@/services/userService";
-import { toast } from "sonner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  CalendarDays,
-  Mail,
-  Phone,
-  MapPin,
-  Edit,
-  Camera,
-  Check,
-} from "lucide-react";
-import useUserStore from "@/hooks/useUserStore";
-import { formatDate } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
-import EditProfileForm from "../components/EditProfileForm";
+import { useCharityHearts } from "@/hooks/useNFTContract";
+import useUserStore from "@/hooks/useUserStore";
+import { updateUser } from "@/services/userService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
+import { toast } from "sonner";
+import { useImageUpload } from "../hooks/useImageUpload";
+import { useNFTs } from "../hooks/useNFTs";
+import NFTGallery from "../components/Profile/NFTGallery";
+import ProfileHeader from "../components/Profile/ProfileHeader";
+import ProfileInfo from "../components/Profile/ProfileInfo";
 
 const Profile = () => {
   const { user, setUser } = useUserStore();
   const queryClient = useQueryClient();
-  const [loading, setLoading] = useState({
-    cover: false,
-    avatar: false,
-  });
+  const { getUserNFTs } = useCharityHearts();
 
-  // Update user mutation
+  // Consolidated update user mutation
   const { mutate: updateUserMutation } = useMutation({
     mutationFn: (data) => updateUser(user.id, data),
     onSuccess: (data) => {
@@ -41,96 +25,15 @@ const Profile = () => {
       queryClient.invalidateQueries(["user"]);
       toast.success("Cập nhật thành công!");
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("Có lỗi xảy ra khi cập nhật!");
     },
   });
 
-  // Add new mutation for updating profile
-  const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
-    mutationFn: (data) => updateUser(user.id, data),
-    onSuccess: (data) => {
-      setUser(data);
-      queryClient.invalidateQueries(["user"]);
-      toast.success("Cập nhật thông tin thành công!");
-    },
-    onError: (error) => {
-      toast.error("Có lỗi xảy ra khi cập nhật thông tin!");
-    },
-  });
-
-  const validateImage = (file) => {
-    const validTypes = ["image/jpeg", "image/png", "image/gif"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    if (!validTypes.includes(file.type)) {
-      toast.error("Vui lòng tải lên file ảnh (JPG, PNG, GIF)");
-      return false;
-    }
-
-    if (file.size > maxSize) {
-      toast.error("Kích thước ảnh phải nhỏ hơn 5MB");
-      return false;
-    }
-
-    return true;
-  };
-
-  // Handle cover image upload
-  const handleCoverUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!validateImage(file)) return;
-
-    try {
-      setLoading((prev) => ({ ...prev, cover: true }));
-      const { url } = await uploadFile(file);
-      await updateUserMutation({ cover: url });
-    } catch (error) {
-      console.error("Error uploading cover:", error);
-      toast.error("Có lỗi xảy ra khi tải ảnh lên!");
-    } finally {
-      setLoading((prev) => ({ ...prev, cover: false }));
-    }
-  };
-
-  // Handle avatar upload using the same pattern
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!validateImage(file)) return;
-
-    try {
-      setLoading((prev) => ({ ...prev, avatar: true }));
-      const { url } = await uploadFile(file);
-      await updateUserMutation({ image: url });
-    } catch (error) {
-      console.error("Error uploading avatar:", error);
-      toast.error("Có lỗi xảy ra khi tải ảnh lên!");
-    } finally {
-      setLoading((prev) => ({ ...prev, avatar: false }));
-    }
-  };
-
-  // Handle profile update
-  const handleUpdateProfile = (data) => {
-    updateProfile(data);
-  };
-
-  const renderField = (icon, label, value) => {
-    if (!value) return null;
-    return (
-      <div className="flex items-center gap-2 text-sm">
-        {icon}
-        <div>
-          <p className="text-muted-foreground">{label}</p>
-          <p className="font-medium">{value}</p>
-        </div>
-      </div>
-    );
-  };
+  // Custom hooks
+  const { loading, handleCoverUpload, handleAvatarUpload } =
+    useImageUpload(updateUserMutation);
+  const { nfts, loading: nftsLoading, error: nftsError } = useNFTs(getUserNFTs);
 
   return (
     <>
@@ -163,188 +66,113 @@ const Profile = () => {
       </Helmet>
 
       <div className="min-h-screen pb-10">
-        <div
-          className="relative h-[200px] md:h-[300px] group cursor-pointer"
-          style={
-            user?.cover
-              ? {
-                  backgroundImage: `url(${user.cover})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }
-              : {
-                  background:
-                    "linear-gradient(to right, var(--primary-light), var(--primary-dark))",
-                }
-          }
-        >
-          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity">
-              Bấm để thay đổi ảnh bìa
-            </p>
-          </div>
+        <ProfileHeader
+          user={user}
+          loading={loading}
+          onCoverUpload={handleCoverUpload}
+        />
 
-          <Input
-            type="file"
-            id="cover-upload"
-            className="hidden"
-            accept="image/png,image/jpeg,image/gif"
-            onChange={handleCoverUpload}
-            disabled={loading.cover}
-          />
+        <div className="container px-4 my-6">
+          <Card className="pt-8">
+            <CardHeader>
+              <ProfileInfo
+                user={user}
+                onUpdateProfile={updateUserMutation}
+                isUpdatingProfile={false}
+                loading={loading}
+                onAvatarUpload={handleAvatarUpload}
+              />
+            </CardHeader>
 
-          <Label
-            htmlFor="cover-upload"
-            className="absolute inset-0 cursor-pointer"
-          >
-            {loading.cover && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
-              </div>
-            )}
-          </Label>
+            <CardContent>
+              <Tabs
+                defaultValue="nfts"
+                size="md"
+                className="w-full bg-gradient-to-r from-indigo-50 via-white to-indigo-50 rounded-lg shadow-lg p-6"
+              >
+                <TabsList className="bg-white rounded-lg shadow-inner p-1 mb-4">
+                  <TabsTrigger
+                    value="nfts"
+                    className="hover:bg-indigo-100 rounded-md transition-colors duration-200"
+                  >
+                    NFTs
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="about"
+                    className="hover:bg-indigo-100 rounded-md transition-colors duration-200"
+                  >
+                    Thông tin
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="campaigns"
+                    className="hover:bg-indigo-100 rounded-md transition-colors duration-200"
+                  >
+                    Chiến dịch
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="donations"
+                    className="hover:bg-indigo-100 rounded-md transition-colors duration-200"
+                  >
+                    Đóng góp
+                  </TabsTrigger>
+                </TabsList>
 
-          {/* Optional: Camera icon indicator */}
-          <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Camera className="h-6 w-6 text-white" />
-          </div>
-        </div>
+                <TabsContent
+                  value="about"
+                  className="bg-white rounded-lg p-6 shadow-md transition-all duration-300 ease-in-out"
+                >
+                  <ProfileInfo
+                    user={user}
+                    onUpdateProfile={updateUserMutation}
+                    isUpdatingProfile={false}
+                    loading={loading}
+                    onAvatarUpload={handleAvatarUpload}
+                    showAvatar={false}
+                  />
+                </TabsContent>
 
-        <div className="container px-4 -mt-20">
-          <div className="relative">
-            <Input
-              type="file"
-              id="avatar-upload"
-              className="hidden"
-              accept="image/*"
-              onChange={handleAvatarUpload}
-              disabled={loading.avatar}
-            />
-            <Label htmlFor="avatar-upload" className="cursor-pointer">
-              <Avatar className="absolute -top-16 border-4 border-background h-32 w-32 group">
-                <AvatarImage src={user?.image} />
-                <AvatarFallback className="text-4xl">
-                  {user?.name?.charAt(0)}
-                </AvatarFallback>
-                <div className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  {loading.avatar ? (
-                    <Loader2 className="h-6 w-6 text-white animate-spin" />
-                  ) : (
-                    <Camera className="h-6 w-6 text-white" />
-                  )}
-                </div>
-              </Avatar>
-            </Label>
-
-            <Card className="pt-20">
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div className="space-y-2">
-                  <h2 className="text-2xl md:text-3xl font-bold">
-                    {user?.name}
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">
-                      {user?.roleId === 2 ? "User" : "Admin"}
-                    </Badge>
-                    {user?.isVerified && (
-                      <Badge variant="secondary" className="gap-1">
-                        <Check className="h-3 w-3" />
-                        Email đã xác minh
-                      </Badge>
-                    )}
-                    {user?.UserBadge?.map((userBadge) => (
-                      <Badge
-                        key={userBadge.id}
-                        variant="secondary"
-                        className="gap-1"
-                      >
-                        <img
-                          src={userBadge.badge.iconUrl}
-                          alt={userBadge.badge.name}
-                          className="h-3 w-3"
-                        />
-                        {userBadge.badge.name}
-                        <span
-                          className="ml-1 text-xs opacity-75"
-                          title={`Được trao ngày ${new Date(
-                            userBadge.awardedAt
-                          ).toLocaleDateString("vi-VN")}`}
-                        >
-                          (
-                          {new Date(userBadge.awardedAt).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                          )
-                        </span>
-                      </Badge>
-                    ))}
+                <TabsContent
+                  value="campaigns"
+                  className="bg-white rounded-lg p-6 shadow-md transition-all duration-300 ease-in-out"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="text-center text-muted-foreground py-10">
+                      Chưa có chiến dịch nào
+                    </div>
                   </div>
-                </div>
-                <EditProfileForm
-                  user={user}
-                  onSubmit={handleUpdateProfile}
-                  isLoading={isUpdatingProfile}
-                />
-              </CardHeader>
+                </TabsContent>
 
-              <CardContent>
-                <Tabs defaultValue="about" className="w-full">
-                  <TabsList>
-                    <TabsTrigger value="about">Thông tin</TabsTrigger>
-                    <TabsTrigger value="campaigns">Chiến dịch</TabsTrigger>
-                    <TabsTrigger value="donations">Đóng góp</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="about" className="space-y-6">
-                    {user?.bio && (
-                      <div className="space-y-2">
-                        <h3 className="font-semibold">Bio</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {user.bio}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {renderField(
-                        <Mail className="h-4 w-4" />,
-                        "Email",
-                        user?.email
-                      )}
-                      {renderField(
-                        <Phone className="h-4 w-4" />,
-                        "Phone",
-                        user?.phoneNumber
-                      )}
-                      {renderField(
-                        <MapPin className="h-4 w-4" />,
-                        "Địa chỉ ví",
-                        user?.address
-                      )}
-                      {renderField(
-                        <CalendarDays className="h-4 w-4" />,
-                        "Tham gia",
-                        formatDate(user?.createdAt)
-                      )}
+                <TabsContent
+                  value="donations"
+                  className="bg-white rounded-lg p-6 shadow-md transition-all duration-300 ease-in-out"
+                >
+                  <div className="space-y-4">
+                    <div className="text-center text-muted-foreground py-10">
+                      Chưa có đóng góp nào
                     </div>
-                  </TabsContent>
+                  </div>
+                </TabsContent>
 
-                  <TabsContent value="campaigns">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {/* Campaign cards will go here */}
+                <TabsContent
+                  value="nfts"
+                  className="bg-white rounded-lg p-6 shadow-md transition-all duration-300 ease-in-out"
+                >
+                  {nftsError ? (
+                    <div className="text-center py-10 text-red-500">
+                      {nftsError}
                     </div>
-                  </TabsContent>
-
-                  <TabsContent value="donations">
-                    <div className="space-y-4">
-                      {/* Donation history will go here */}
+                  ) : nftsLoading ? (
+                    <div className="text-center py-10">
+                      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                      Đang tải NFTs...
                     </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </div>
+                  ) : (
+                    <NFTGallery nfts={nfts} />
+                  )}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </>

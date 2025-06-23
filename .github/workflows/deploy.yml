@@ -11,6 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Decode ENV file
+        run: |
+          echo ${{ secrets.ENV_FILE_BASE64 }} | base64 -d > .env
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
@@ -38,5 +42,5 @@ jobs:
               docker run -d \
               --name app-container \
               -p 5173:5173 \
-              -e VITE_APP_BACKEND_URL=${{ secrets.BACKEND_URL }} \
+              --env-file .env \
               ${{secrets.DOCKER_USERNAME}}/charity-client:latest'
