@@ -11,10 +11,12 @@ import { HelmetProvider } from "react-helmet-async";
 import { NotificationProvider } from "./components/NotificationProvider";
 import { WagmiConfig } from "wagmi";
 import { wagmiConfig } from "./lib/web3modal";
+// import { ThirdwebProvider } from "@thirdweb-dev/react";
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
+  // <ThirdwebProvider activeChain="sepolia">
   <HelmetProvider>
     <WagmiConfig config={wagmiConfig}>
       <NotificationProvider>
@@ -26,4 +28,5 @@ createRoot(document.getElementById("root")).render(
       </NotificationProvider>
     </WagmiConfig>
   </HelmetProvider>
+  // </ThirdwebProvider>
 );

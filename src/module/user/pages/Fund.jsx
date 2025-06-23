@@ -99,7 +99,6 @@ const Fund = () => {
     enabled: !!campaign?.chainCampaignId,
     retry: false, // Don't retry on error
   });
-  console.log(closeHistory);
 
   useEffect(() => {
     let cleanupFunction;

@@ -14,10 +14,10 @@ export default function MainLayout() {
       </div>
       <Brand />
       <Footer />
-      <Separator className="mt-10" />
-      <div className="py-10 container">
+      {/* <Separator className="mt-10" /> */}
+      {/* <div className="py-10 container">
         <span className="font-bold ">@MakeByManhCuong</span>
-      </div>
+      </div> */}
       <Auth />
     </>
   );

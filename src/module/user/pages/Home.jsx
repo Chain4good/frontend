@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { recommendations } from "@/services/aiService";
 import HowWork from "../components/HowWork";
+import { NFTLeaderboard } from "../components/NFTLeaderboard";
 
 export default function Home() {
   const [filters, setFilters] = useState({
@@ -46,6 +47,7 @@ export default function Home() {
         </section>
         <KeyFeature />
         <Guide />
+        {/* <NFTLeaderboard /> */}
         <div className="container mx-auto px-4 py-8">
           <Discover />
         </div>

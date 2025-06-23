@@ -29,7 +29,7 @@ export const useSocket = () => {
     });
 
     socketInstance.on("disconnect", () => {
-      console.log("Disconnected from socket server");
+      // console.log("Disconnected from socket server");
     });
 
     setSocket(socketInstance);
