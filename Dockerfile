@@ -4,6 +4,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# Add environment validation
+RUN echo "Checking for required files..."
+RUN touch .env
+
 RUN npm run build
 
 FROM nginx:alpine

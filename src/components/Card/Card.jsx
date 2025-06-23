@@ -1,15 +1,10 @@
-import React from "react";
+import { CampaignStatusColors, CampaignStatusLabel } from "@/constants/status";
+import { TOKEN } from "@/hooks/useCharityDonation"; // Thêm import TOKEN
+import { truncate } from "lodash";
+import { CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProgressBar from "../ProgressBar/ProgressBar";
 import { Badge } from "../ui/badge";
-import {
-  CampaignStatus,
-  CampaignStatusColors,
-  CampaignStatusLabel,
-} from "@/constants/status";
-import { CheckCircle } from "lucide-react";
-import { truncate } from "lodash";
-import { TOKEN } from "@/hooks/useCharityDonation"; // Thêm import TOKEN
 
 const Card = ({ campaign, size, titleMaxLength }) => {
   const getTokenInfo = (tokenAddress) => {
@@ -17,7 +12,7 @@ const Card = ({ campaign, size, titleMaxLength }) => {
 
     const matchingToken = Object.entries(TOKEN).find(
       ([_, token]) =>
-        token.address.toLowerCase() === tokenAddress?.toLowerCase()
+        token.address?.toLowerCase() === tokenAddress?.toLowerCase()
     );
 
     return matchingToken ? matchingToken[1] : null;
@@ -99,7 +94,7 @@ const Card = ({ campaign, size, titleMaxLength }) => {
         <ProgressBar
           value={Number(campaign?.totalDonated)}
           max={Number(campaign?.tokenGoal)}
-          symbol={campaign?.tokenSymbol}
+          tokenSymbol={campaign.tokenSymbol}
         />
       </div>
     </Link>

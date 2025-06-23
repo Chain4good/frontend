@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 const TokenSelectModal = ({ onSelect, selectedToken, campaignAcceptToken }) => {
   const [open, setOpen] = useState(false);
 
-  // Find matching token info for campaignAcceptToken
   const getTokenByAddress = (address) => {
     if (!address) return null;
     const match = Object.entries(TOKEN).find(
@@ -23,7 +22,6 @@ const TokenSelectModal = ({ onSelect, selectedToken, campaignAcceptToken }) => {
     return match ? { id: match[0], ...match[1] } : null;
   };
 
-  // Set initial selected token based on campaignAcceptToken
   useEffect(() => {
     if (campaignAcceptToken) {
       const acceptedToken = getTokenByAddress(campaignAcceptToken);
@@ -38,7 +36,6 @@ const TokenSelectModal = ({ onSelect, selectedToken, campaignAcceptToken }) => {
     setOpen(false);
   };
 
-  // Filter tokens to only show accepted token if specified
   const tokens = Object.entries(TOKEN)
     .filter(
       ([_, token]) =>
@@ -55,11 +52,9 @@ const TokenSelectModal = ({ onSelect, selectedToken, campaignAcceptToken }) => {
       decimals: token.decimals,
     }));
 
-  // If no token is selected, use the first available token
   const selectedTokenInfo =
     tokens.find((t) => t.id === selectedToken) || tokens[0];
 
-  // Update button UI based on token filtering
   const isLocked = campaignAcceptToken && tokens.length === 1;
 
   return (
