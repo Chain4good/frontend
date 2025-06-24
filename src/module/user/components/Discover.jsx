@@ -4,16 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { HeartHandshake } from "lucide-react";
 
-const Discover = () => {
-  const { data: campaigns, isLoading } = useQuery({
-    queryKey: ["campaigns"],
-    queryFn: () =>
-      getCampaigns({
-        page: 1,
-        limit: 5,
-      }),
-  });
-
+const Discover = ({ campaigns }) => {
   const container = {
     hidden: { opacity: 0 },
     show: {

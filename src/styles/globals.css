@@ -59,3 +59,18 @@ circle {
   font-size: 0.9em;
   margin-top: 0.5em;
 }
+
+/* Add this after your existing @keyframes definitions */
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(to bottom right, #cdf3bc, #019953);
+  border-radius: 50%;
+  z-index: -1;
+}

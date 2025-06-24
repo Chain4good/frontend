@@ -1,13 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { ethers } from "ethers";
 import CharityDonationABI from "../contracts/abi/CharityDonation.json";
-import { updateCampaign } from "@/services/campaignService"; // Add this import
+import { updateCampaign } from "@/services/campaignService";
 
-// const CONTRACT_ADDRESS = "0x02f0913C80fAab95154555f9Af6D97dD5e50B5b6";
-// const CONTRACT_ADDRESS = "0xF5407c6152824f6D2b073e6cBc7e03D1CE6D54eA";
 const CONTRACT_ADDRESS = "0xa0A6fB7ef8A68E24e6D0C400e5b731D80BAD97bD";
-// 0xF5407c6152824f6D2b073e6cBc7e03D1CE6D54eA
-// new: `0xa0A6fB7ef8A68E24e6D0C400e5b731D80BAD97bD`
+
+// Constants for better maintainability
+const GAS_LIMIT_MULTIPLIER = 1.2; // 20% buffer
+const DEFAULT_GAS_LIMIT = 300000;
 
 export const TOKEN = {
   USDC: {
@@ -57,20 +57,33 @@ export const TOKEN = {
   },
 };
 
+// Error messages for better maintainability
+const ERROR_MESSAGES = {
+  NO_METAMASK: "MetaMask chưa được cài đặt",
+  USER_REJECTED: "Người dùng từ chối kết nối ví",
+  WALLET_NOT_CONNECTED: "Vui lòng kết nối ví MetaMask trước",
+  INSUFFICIENT_FUNDS: "Không đủ ETH để thực hiện giao dịch (bao gồm phí gas)",
+  TRANSACTION_REJECTED: "Người dùng từ chối giao dịch",
+  INSUFFICIENT_TOKEN: "Số dư token không đủ",
+  APPROVAL_FAILED: "Token approval thất bại",
+  NEED_APPROVAL: "Cần phê duyệt token - vui lòng thử lại",
+};
+
 export const useCharityDonation = () => {
-  const getContract = async () => {
+  // Memoized contract getter with better error handling
+  const getContract = useCallback(async () => {
     if (!window.ethereum) {
-      throw new Error("MetaMask chưa được cài đặt");
+      throw new Error(ERROR_MESSAGES.NO_METAMASK);
     }
 
     try {
-      // Request account access explicitly
       await window.ethereum.request({
         method: "eth_requestAccounts",
       });
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
+
       return new ethers.Contract(
         CONTRACT_ADDRESS,
         CharityDonationABI.abi,
@@ -78,275 +91,339 @@ export const useCharityDonation = () => {
       );
     } catch (error) {
       if (error.code === 4001) {
-        throw new Error("Người dùng từ chối kết nối ví");
+        throw new Error(ERROR_MESSAGES.USER_REJECTED);
       }
       if (error.code === 4100) {
-        throw new Error("Vui lòng kết nối ví MetaMask trước");
+        throw new Error(ERROR_MESSAGES.WALLET_NOT_CONNECTED);
       }
       throw error;
     }
-  };
+  }, []);
 
-  return useMemo(
-    () => ({
-      createCampaign: async (
-        title,
-        tokenAddress,
-        goal,
-        duration,
-        isNoLimit
-      ) => {
-        try {
-          const contract = await getContract();
+  // Helper function for gas estimation
+  const estimateGasWithBuffer = useCallback(
+    async (contract, method, params, overrides = {}) => {
+      try {
+        const gasEstimate = await contract[method].estimateGas(
+          ...params,
+          overrides
+        );
+        return (
+          (gasEstimate * BigInt(Math.floor(GAS_LIMIT_MULTIPLIER * 10))) /
+          BigInt(10)
+        );
+      } catch (error) {
+        console.warn("Gas estimation failed, using default:", error);
+        return BigInt(DEFAULT_GAS_LIMIT);
+      }
+    },
+    []
+  );
 
-          // Convert goal to BigNumber if it isn't already
-          const goalBigNumber = ethers.getBigInt(goal.toString());
+  // Helper function to handle BigInt serialization
+  const sanitizeErrorMessage = useCallback((message) => {
+    return message.replace(/BigInt\((.*?)\)/g, "$1");
+  }, []);
 
-          // Convert duration to number
-          const durationNumber = Number(duration);
+  // Optimized campaign creation
+  const createCampaign = useCallback(
+    async (title, tokenAddress, goal, duration, isNoLimit) => {
+      try {
+        const contract = await getContract();
 
-          const tx = await contract.createCampaign(
-            title,
-            tokenAddress,
-            goalBigNumber,
-            durationNumber,
-            isNoLimit
+        const goalBigNumber = ethers.getBigInt(goal.toString());
+        const durationNumber = Number(duration);
+
+        const gasLimit = await estimateGasWithBuffer(
+          contract,
+          "createCampaign",
+          [title, tokenAddress, goalBigNumber, durationNumber, isNoLimit]
+        );
+
+        const tx = await contract.createCampaign(
+          title,
+          tokenAddress,
+          goalBigNumber,
+          durationNumber,
+          isNoLimit,
+          { gasLimit }
+        );
+
+        await tx.wait();
+        const count = await contract.campaignCount();
+
+        return {
+          chainCampaignId: Number(count) - 1,
+          txHash: tx.hash,
+        };
+      } catch (error) {
+        console.error("Create campaign error:", error);
+        const errorMessage = sanitizeErrorMessage(error.message);
+        throw new Error(errorMessage);
+      }
+    },
+    [getContract, estimateGasWithBuffer, sanitizeErrorMessage]
+  );
+
+  // Optimized ETH donation
+  const donateETH = useCallback(
+    async (campaignId, amountInEther) => {
+      try {
+        const contract = await getContract();
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const userAddress = await signer.getAddress();
+
+        const balance = await provider.getBalance(userAddress);
+        const amountInWei = ethers.parseEther(amountInEther);
+
+        // Estimate gas costs
+        const feeData = await provider.getFeeData();
+        const gasPrice = feeData.gasPrice;
+        const gasLimit = await estimateGasWithBuffer(
+          contract,
+          "donate",
+          [campaignId, amountInWei],
+          { value: amountInWei }
+        );
+
+        const gasCost = gasLimit * gasPrice;
+        const totalCost = amountInWei + gasCost;
+
+        if (balance < totalCost) {
+          const requiredETH = ethers.formatEther(totalCost);
+          const userETH = ethers.formatEther(balance);
+          throw new Error(
+            `Không đủ ETH. Cần: ${requiredETH} ETH (bao gồm phí gas), Có: ${userETH} ETH`
           );
-
-          const receipt = await tx.wait();
-          const count = await contract.campaignCount();
-
-          // Convert BigInt to Number for chainCampaignId
-          const chainCampaignId = Number(count) - 1;
-
-          return {
-            chainCampaignId,
-            txHash: tx.hash,
-          };
-        } catch (error) {
-          console.error("Create campaign error:", error);
-
-          // Convert BigInt to string in error messages
-          const errorMessage = error.message.replace(/BigInt\((.*?)\)/g, "$1");
-          throw new Error(errorMessage);
         }
-      },
 
-      donateETH: async (campaignId, amountInEther) => {
-        try {
-          const contract = await getContract();
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          const signer = await provider.getSigner();
-          const userAddress = await signer.getAddress();
+        const tx = await contract.donate(campaignId, amountInWei, {
+          value: amountInWei,
+          gasLimit,
+          gasPrice,
+        });
 
-          const balance = await provider.getBalance(userAddress);
-          const amountInWei = ethers.parseEther(amountInEther);
+        const receipt = await tx.wait();
 
-          const feeData = await provider.getFeeData();
-          const gasPrice = feeData.gasPrice;
+        return {
+          txHash: tx.hash,
+          receipt,
+        };
+      } catch (error) {
+        console.error("Donation error:", error);
 
-          const gasLimit = await contract.donate.estimateGas(
-            campaignId,
-            amountInWei,
-            {
-              value: amountInWei,
-            }
-          );
-
-          const gasCost = gasLimit * gasPrice;
-          const totalCost = amountInWei + gasCost;
-
-          if (balance < totalCost) {
-            const requiredETH = ethers.formatEther(totalCost);
-            const userETH = ethers.formatEther(balance);
-            throw new Error(
-              `Không đủ ETH. Cần: ${requiredETH} ETH (bao gồm phí gas), Có: ${userETH} ETH`
-            );
-          }
-
-          const tx = await contract.donate(campaignId, amountInWei, {
-            value: amountInWei,
-            gasLimit: (gasLimit * BigInt(12)) / BigInt(10),
-            gasPrice,
-          });
-
-          const receipt = await tx.wait();
-          return {
-            txHash: tx.hash,
-            receipt: receipt,
-          };
-        } catch (error) {
-          console.error("Donation error:", error);
-
-          if (error.code === "INSUFFICIENT_FUNDS") {
-            throw new Error(
-              "Không đủ ETH để thực hiện giao dịch (bao gồm phí gas)"
-            );
-          }
-
-          throw error;
+        if (error.code === "INSUFFICIENT_FUNDS") {
+          throw new Error(ERROR_MESSAGES.INSUFFICIENT_FUNDS);
         }
-      },
 
-      donateToken: async (campaignId, tokenAddress, amount, decimals = 18) => {
-        try {
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          const signer = await provider.getSigner();
-          const userAddress = await signer.getAddress();
+        throw error;
+      }
+    },
+    [getContract, estimateGasWithBuffer]
+  );
 
-          const tokenContract = new ethers.Contract(
-            tokenAddress,
-            [
-              "function approve(address spender, uint256 amount) public returns (bool)",
-              "function allowance(address owner, address spender) public view returns (uint256)",
-              "function balanceOf(address account) public view returns (uint256)",
-              "function decimals() public view returns (uint8)",
-            ],
-            signer
+  // Optimized token donation with better error handling
+  const donateToken = useCallback(
+    async (campaignId, tokenAddress, amount, decimals = 18) => {
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const userAddress = await signer.getAddress();
+
+        // Token contract interface
+        const tokenABI = [
+          "function approve(address spender, uint256 amount) public returns (bool)",
+          "function allowance(address owner, address spender) public view returns (uint256)",
+          "function balanceOf(address account) public view returns (uint256)",
+          "function decimals() public view returns (uint8)",
+        ];
+
+        const tokenContract = new ethers.Contract(
+          tokenAddress,
+          tokenABI,
+          signer
+        );
+
+        // Verify and get actual decimals
+        const actualDecimals = await tokenContract.decimals();
+        if (actualDecimals !== decimals) {
+          console.warn(
+            `Token decimals mismatch. Expected: ${decimals}, Actual: ${actualDecimals}`
           );
+          decimals = actualDecimals;
+        }
 
-          // Verify token decimals
-          const actualDecimals = await tokenContract.decimals();
-          if (actualDecimals !== decimals) {
-            console.warn(
-              `Token decimals mismatch. Expected: ${decimals}, Actual: ${actualDecimals}`
-            );
-            decimals = actualDecimals;
+        const parsedAmount = ethers.parseUnits(amount.toString(), decimals);
+
+        // Check token balance
+        const balance = await tokenContract.balanceOf(userAddress);
+        if (balance < parsedAmount) {
+          throw new Error(
+            `Không đủ token. Có: ${ethers.formatUnits(
+              balance,
+              decimals
+            )}, Cần: ${amount}`
+          );
+        }
+
+        // Check and handle allowance
+        const currentAllowance = await tokenContract.allowance(
+          userAddress,
+          CONTRACT_ADDRESS
+        );
+
+        if (currentAllowance < parsedAmount) {
+          const approveTx = await tokenContract.approve(
+            CONTRACT_ADDRESS,
+            parsedAmount
+          );
+          const approveReceipt = await approveTx.wait();
+
+          if (!approveReceipt.status) {
+            throw new Error(ERROR_MESSAGES.APPROVAL_FAILED);
           }
 
-          const parsedAmount = ethers.parseUnits(amount.toString(), decimals);
-
-          // Check token balance
-          const balance = await tokenContract.balanceOf(userAddress);
-          if (balance < parsedAmount) {
-            throw new Error(
-              `Không đủ token. Có: ${ethers.formatUnits(
-                balance,
-                decimals
-              )}, Cần: ${amount}`
-            );
-          }
-
-          // Check current allowance
-          const currentAllowance = await tokenContract.allowance(
+          // Verify approval
+          const newAllowance = await tokenContract.allowance(
             userAddress,
             CONTRACT_ADDRESS
           );
-
-          // If allowance is insufficient, approve
-          if (currentAllowance < parsedAmount) {
-            const approveTx = await tokenContract.approve(
-              CONTRACT_ADDRESS,
-              parsedAmount
-            );
-            const approveReceipt = await approveTx.wait();
-
-            if (!approveReceipt.status) {
-              throw new Error("Token approval failed");
-            }
-
-            const newAllowance = await tokenContract.allowance(
-              userAddress,
-              CONTRACT_ADDRESS
-            );
-            if (newAllowance < parsedAmount) {
-              throw new Error("Token approval was not successful");
-            }
+          if (newAllowance < parsedAmount) {
+            throw new Error(ERROR_MESSAGES.APPROVAL_FAILED);
           }
-
-          // Execute donation
-          const contract = await getContract();
-          const tx = await contract.donate(campaignId, parsedAmount, {
-            gasLimit: 300000,
-          });
-
-          const receipt = await tx.wait();
-
-          if (!receipt.status) {
-            throw new Error("Donation transaction failed");
-          }
-
-          return {
-            txHash: tx.hash,
-            receipt: receipt,
-          };
-        } catch (error) {
-          console.error("Token donation error:", error);
-
-          if (error.code === "ACTION_REJECTED") {
-            throw new Error("Người dùng từ chối giao dịch");
-          }
-
-          if (error.message.includes("allowance")) {
-            throw new Error("Cần phê duyệt token - vui lòng thử lại");
-          }
-
-          if (error.message.includes("insufficient")) {
-            throw new Error("Số dư token không đủ");
-          }
-
-          throw new Error(error.message || "Quyên góp token thất bại");
         }
-      },
 
-      // closeCampaign: async (campaignId) => {
-      //   const contract = await getContract();
-      //   const tx = await contract.closeCampaign(campaignId);
-      //   await tx.wait();
-      // },
+        // Execute donation
+        const contract = await getContract();
+        const gasLimit = await estimateGasWithBuffer(contract, "donate", [
+          campaignId,
+          parsedAmount,
+        ]);
 
+        const tx = await contract.donate(campaignId, parsedAmount, {
+          gasLimit,
+        });
+        const receipt = await tx.wait();
+
+        if (!receipt.status) {
+          throw new Error("Giao dịch quyên góp thất bại");
+        }
+
+        return {
+          txHash: tx.hash,
+          receipt,
+        };
+      } catch (error) {
+        console.error("Token donation error:", error);
+
+        if (error.code === "ACTION_REJECTED") {
+          throw new Error(ERROR_MESSAGES.TRANSACTION_REJECTED);
+        }
+
+        if (error.message.includes("allowance")) {
+          throw new Error(ERROR_MESSAGES.NEED_APPROVAL);
+        }
+
+        if (error.message.includes("insufficient")) {
+          throw new Error(ERROR_MESSAGES.INSUFFICIENT_TOKEN);
+        }
+
+        throw new Error(error.message || "Quyên góp token thất bại");
+      }
+    },
+    [getContract, estimateGasWithBuffer]
+  );
+
+  // Event listener helper with cleanup
+  const createEventListener = useCallback(
+    (eventName, callback) => {
+      return async (campaignId, dbCampaignId) => {
+        const contract = await getContract();
+
+        const eventHandler = async (...args) => {
+          console.log(`${eventName} event:`, args);
+          try {
+            await callback(dbCampaignId, ...args);
+          } catch (error) {
+            console.error(`Error handling ${eventName} event:`, error);
+          }
+        };
+
+        contract.on(eventName, eventHandler);
+
+        return () => {
+          contract.off(eventName, eventHandler);
+        };
+      };
+    },
+    [getContract]
+  );
+
+  // Optimized contract read operations
+  const getContractData = useCallback(
+    async (method, ...args) => {
+      try {
+        const contract = await getContract();
+        return await contract[method](...args);
+      } catch (error) {
+        console.error(`Error calling ${method}:`, error);
+        throw error;
+      }
+    },
+    [getContract]
+  );
+
+  return useMemo(
+    () => ({
+      // Campaign operations
+      createCampaign,
+
+      // Donation operations
+      donateETH,
+      donateToken,
+
+      // Contract read operations
+      getDonors: (campaignId) => getContractData("getDonors", campaignId),
+      getCampaignStatus: (campaignId) =>
+        getContractData("getCampaignStatus", campaignId),
+      getCampaign: (campaignId) => getContractData("campaigns", campaignId),
+      getCampaignCount: () => getContractData("campaignCount"),
+
+      // Campaign management
       refund: async (campaignId) => {
         const contract = await getContract();
         const tx = await contract.refund(campaignId);
         await tx.wait();
       },
 
-      getDonors: async (campaignId) => {
-        const contract = await getContract();
-        return await contract.getDonors(campaignId);
-      },
-
-      getCampaignStatus: async (campaignId) => {
-        const contract = await getContract();
-        return await contract.getCampaignStatus(campaignId);
-      },
-
-      getCampaign: async (campaignId) => {
-        const contract = await getContract();
-        return await contract.campaigns(campaignId);
-      },
-
-      getCampaignCount: async () => {
-        const contract = await getContract();
-        return await contract.campaignCount();
-      },
-
-      listenToFundsWithdrawn: async (campaignId, dbCampaignId) => {
-        const contract = await getContract();
-
-        contract.on("FundsWithdrawn", async (campaignId, creator, amount) => {
-          console.log("FundsWithdrawn event:", {
-            campaignId: Number(campaignId),
-            creator,
-            amount: amount.toString(),
-          });
-
-          try {
-            await updateCampaign(dbCampaignId, {
-              status: "FINISHED",
-            });
-          } catch (error) {
-            console.error("Error updating campaign status:", error);
-          }
-        });
-
-        return () => {
-          contract.off("FundsWithdrawn");
-        };
-      },
-      getCampaignCloseHistory: async (campaignId) => {
+      closeCampaign: async (campaignId) => {
         try {
           const contract = await getContract();
+          const gasLimit = await estimateGasWithBuffer(
+            contract,
+            "closeCampaign",
+            [campaignId]
+          );
+          const tx = await contract.closeCampaign(campaignId, { gasLimit });
+          const receipt = await tx.wait();
+
+          return {
+            txHash: tx.hash,
+            receipt,
+          };
+        } catch (error) {
+          console.error("Close campaign error:", error);
+          if (error.code === "ACTION_REJECTED") {
+            throw new Error(ERROR_MESSAGES.TRANSACTION_REJECTED);
+          }
+          throw error;
+        }
+      },
+
+      // Advanced queries
+      getCampaignCloseHistory: async (campaignId) => {
+        try {
           const accounts = await window.ethereum.request({
             method: "eth_accounts",
           });
@@ -354,7 +431,10 @@ export const useCharityDonation = () => {
             throw new Error("Vui lòng kết nối ví để xem thông tin này");
           }
 
-          const history = await contract.getCampaignCloseHistory(campaignId);
+          const history = await getContractData(
+            "getCampaignCloseHistory",
+            campaignId
+          );
           return {
             isClosed: history[0],
             closeReason: history[1],
@@ -369,8 +449,11 @@ export const useCharityDonation = () => {
 
       getDonorInfo: async (campaignId, donorAddress) => {
         try {
-          const contract = await getContract();
-          const info = await contract.getDonorInfo(campaignId, donorAddress);
+          const info = await getContractData(
+            "getDonorInfo",
+            campaignId,
+            donorAddress
+          );
           return {
             totalAmount: info[0],
             donationCount: info[1],
@@ -382,50 +465,27 @@ export const useCharityDonation = () => {
         }
       },
 
-      closeCampaign: async (campaignId) => {
-        try {
-          const contract = await getContract();
-          const tx = await contract.closeCampaign(campaignId);
-          const receipt = await tx.wait();
-          return {
-            txHash: tx.hash,
-            receipt,
-          };
-        } catch (error) {
-          console.error("Close campaign error:", error);
-          if (error.code === "ACTION_REJECTED") {
-            throw new Error("Người dùng từ chối giao dịch");
-          }
-          throw error;
+      // Event listeners
+      listenToFundsWithdrawn: createEventListener(
+        "FundsWithdrawn",
+        async (dbCampaignId) => {
+          await updateCampaign(dbCampaignId, { status: "FINISHED" });
         }
-      },
+      ),
 
-      listenToCampaignClosed: async (campaignId, dbCampaignId) => {
-        const contract = await getContract();
-
-        contract.on("CampaignClosed", async (_campaignId, reachedGoal) => {
-          console.log("CampaignClosed event:", {
-            campaignId: Number(_campaignId),
-            reachedGoal,
+      listenToCampaignClosed: createEventListener(
+        "CampaignClosed",
+        async (dbCampaignId, _campaignId, reachedGoal) => {
+          await updateCampaign(dbCampaignId, {
+            status: reachedGoal ? "FINISHED" : "CANCELLED",
           });
+        }
+      ),
 
-          try {
-            await updateCampaign(dbCampaignId, {
-              status: reachedGoal ? "FINISHED" : "CANCELLED",
-            });
-          } catch (error) {
-            console.error("Error updating campaign status:", error);
-          }
-        });
-
-        return () => {
-          contract.off("CampaignClosed");
-        };
-      },
       listenToDonationMade: async (campaignId, callback) => {
         const contract = await getContract();
 
-        contract.on("DonationMade", async (_campaignId, donor, amount) => {
+        const donationHandler = async (_campaignId, donor, amount) => {
           console.log("DonationMade event:", {
             campaignId: Number(_campaignId),
             donor,
@@ -435,14 +495,23 @@ export const useCharityDonation = () => {
           if (Number(_campaignId) === Number(campaignId) && callback) {
             callback();
           }
-        });
+        };
+
+        contract.on("DonationMade", donationHandler);
 
         return () => {
-          contract.off("DonationMade");
+          contract.off("DonationMade", donationHandler);
         };
       },
     }),
-
-    []
+    [
+      createCampaign,
+      donateETH,
+      donateToken,
+      getContractData,
+      estimateGasWithBuffer,
+      createEventListener,
+      getContract,
+    ]
   );
 };
