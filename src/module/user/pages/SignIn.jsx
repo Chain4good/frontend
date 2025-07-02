@@ -1,29 +1,28 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Separator } from "@/components/ui/separator";
-import FacebookSvg from "@/components/Icons/FacebookSvg";
 import GoogleIconSvg from "@/components/Icons/GoogleIconSvg";
-import { Link, useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { signin } from "@/services/authService";
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import {
-  Loader2,
-  Wallet,
+  ArrowRight,
   Eye,
   EyeOff,
-  Mail,
+  Loader2,
   Lock,
-  ArrowRight,
+  Mail,
   Shield,
   Sparkles,
   Star,
+  Wallet,
 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import * as z from "zod";
 
 import { useWallet } from "@/hooks/useWallet";
 import { motion } from "framer-motion";
@@ -35,7 +34,8 @@ const formSchema = z.object({
 
 const SignInPage = () => {
   const navigate = useNavigate();
-  const { handleWeb3Login, isConnected } = useWallet();
+  const { handleWeb3Login, isConnected, isLoggingIn, pendingAutoLogin } =
+    useWallet();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -63,7 +63,9 @@ const SignInPage = () => {
   };
 
   const handleLoginWithGoogle = () => {
-    window.location.href = "http://localhost:3000/auth/google";
+    window.location.href = import.meta.env.VITE_APP_BACKEND_URL
+      ? import.meta.env.VITE_APP_BACKEND_URL + "/auth/google"
+      : "https://api.chain4good.io.vn/auth/google";
   };
 
   const container = {
@@ -187,13 +189,23 @@ const SignInPage = () => {
                   size="lg"
                   className="w-full h-12 font-medium bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 border-primary/30 hover:border-primary/50 transition-all duration-300 group"
                   onClick={() => handleWeb3Login()}
+                  disabled={isLoggingIn}
                 >
                   <div className="flex items-center justify-center gap-3">
                     <motion.div
-                      animate={isConnected ? {} : { rotate: 360 }}
+                      animate={
+                        isLoggingIn || pendingAutoLogin
+                          ? { rotate: 360 }
+                          : isConnected
+                          ? {}
+                          : { rotate: 360 }
+                      }
                       transition={{
                         duration: 2,
-                        repeat: isConnected ? 0 : Infinity,
+                        repeat:
+                          isLoggingIn || pendingAutoLogin || !isConnected
+                            ? Infinity
+                            : 0,
                         ease: "linear",
                       }}
                     >
@@ -203,9 +215,17 @@ const SignInPage = () => {
                       />
                     </motion.div>
                     <span className="text-sm font-medium">
-                      {isConnected ? "Đăng nhập bằng ví" : "Kết nối với ví"}
+                      {isLoggingIn
+                        ? "Đang ký xác nhận..."
+                        : pendingAutoLogin
+                        ? "Đang kết nối..."
+                        : isConnected
+                        ? "Đăng nhập bằng ví"
+                        : "Kết nối với ví"}
                     </span>
-                    <ArrowRight className="h-4 w-4 text-primary/70 group-hover:translate-x-1 transition-transform" />
+                    {!isLoggingIn && !pendingAutoLogin && (
+                      <ArrowRight className="h-4 w-4 text-primary/70 group-hover:translate-x-1 transition-transform" />
+                    )}
                   </div>
                 </Button>
               </motion.div>

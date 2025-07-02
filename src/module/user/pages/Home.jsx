@@ -1,18 +1,16 @@
+import { usePost } from "@/hooks/usePost";
+import { getCampaigns } from "@/services/campaignService";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Banner from "../components/Banner";
-import Discover from "../components/Discover";
-import Guide from "../components/Guide";
-import KeyFeature from "../components/KeyFeature";
-import Topic from "../components/Topic";
-import { usePost } from "@/hooks/usePost";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { recommendations } from "@/services/aiService";
-import HowWork from "../components/HowWork";
-import { NFTLeaderboard } from "../components/NFTLeaderboard";
 import BehindTheBanner from "../components/BehindTheBanner";
 import BehindTheBanner2 from "../components/BehindTheBanner2";
-import { getCampaigns } from "@/services/campaignService";
+import Discover from "../components/Discover";
+import Guide from "../components/Guide";
+import HowWork from "../components/HowWork";
+import KeyFeature from "../components/KeyFeature";
+import Topic from "../components/Topic";
 
 export default function Home() {
   const [filters, setFilters] = useState({
@@ -59,7 +57,6 @@ export default function Home() {
         </section>
         <KeyFeature />
         <Guide />
-        {/* <NFTLeaderboard /> */}
         <div className="container mx-auto px-4 py-8">
           <Discover campaigns={campaigns} />
         </div>

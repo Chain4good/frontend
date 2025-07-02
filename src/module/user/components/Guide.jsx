@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
-import React from "react";
 import { motion } from "framer-motion";
 import {
-  Sparkles,
-  Shield,
-  Users,
-  TrendingUp,
-  CheckCircle,
   ArrowRight,
+  CheckCircle,
+  Shield,
+  Sparkles,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 
 const Guide = () => {
@@ -133,7 +132,7 @@ const Guide = () => {
           whileHover={{ scale: 1.02 }}
           dangerouslySetInnerHTML={{
             __html:
-              "Quyên góp với blockchain dễ dàng<br/> <span class='relative'>bảo mật và minh bạch<span class='absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent blur-xl'></span></span>",
+              "Quyên góp với blockchain dễ dàng<br/> <span class='relative text-primary'>bảo mật và minh bạch<span class='absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent blur-xl'></span></span>",
           }}
         />
 

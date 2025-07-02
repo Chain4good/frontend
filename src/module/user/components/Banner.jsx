@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, Shield, Users } from "lucide-react";
+import { Shield, Sparkles, TrendingUp, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 
@@ -216,7 +216,7 @@ const Banner = () => {
       </div>
 
       {/* Enhanced Bottom Section */}
-      <motion.div
+      {/* <motion.div
         className="relative z-10 flex gap-10 pt-16 md:px-0 px-4"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -267,7 +267,7 @@ const Banner = () => {
             </div>
           </div>
         </div>
-      </motion.div>
+      </motion.div> */}
 
       {/* Floating Particles Effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
