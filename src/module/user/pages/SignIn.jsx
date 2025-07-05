@@ -64,7 +64,7 @@ const SignInPage = () => {
 
   const handleLoginWithGoogle = () => {
     window.location.href = import.meta.env.VITE_APP_BACKEND_URL
-      ? import.meta.env.VITE_APP_BACKEND_URL + "/auth/google"
+      ? import.meta.env.VITE_APP_BACKEND_URL + "auth/google"
       : "https://api.chain4good.io.vn/auth/google";
   };
 
