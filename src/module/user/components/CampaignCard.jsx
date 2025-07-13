@@ -19,21 +19,95 @@ import {
   Target,
   Calendar,
   ChevronRight,
+  Play,
+  Pause,
+  RotateCcw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import TokenSelectModal from "./TokenSelectModal";
 
-const CampaignCard = ({
-  campaign,
-  handleCreateContract,
-  handleCloseCampaign,
-  isClosing,
-}) => {
+const CampaignCard = ({ campaign, handleCreateContract }) => {
   const [selectedToken, setSelectedToken] = useState("ETH");
   const [isCreating, setIsCreating] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isVertical, setIsVertical] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const videoRef = useRef(null);
+  const backgroundVideoRef = useRef(null);
   const navigate = useNavigate();
   const isExpired = new Date(campaign.deadline) <= new Date();
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleLoadedMetadata = () => {
+      const aspectRatio = video.videoWidth / video.videoHeight;
+      setIsVertical(aspectRatio < 1);
+      setDuration(video.duration);
+    };
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  // Sync background video with main video
+  useEffect(() => {
+    const mainVideo = videoRef.current;
+    const bgVideo = backgroundVideoRef.current;
+
+    if (!mainVideo || !bgVideo || !isVertical) return;
+
+    const syncVideos = () => {
+      if (Math.abs(bgVideo.currentTime - mainVideo.currentTime) > 0.1) {
+        bgVideo.currentTime = mainVideo.currentTime;
+      }
+    };
+
+    const handleMainPlay = () => {
+      bgVideo.play().catch(() => {});
+      syncVideos();
+    };
+
+    const handleMainPause = () => {
+      bgVideo.pause();
+    };
+
+    const handleMainSeeked = () => {
+      syncVideos();
+    };
+
+    mainVideo.addEventListener("play", handleMainPlay);
+    mainVideo.addEventListener("pause", handleMainPause);
+    mainVideo.addEventListener("seeked", handleMainSeeked);
+    mainVideo.addEventListener("timeupdate", syncVideos);
+
+    return () => {
+      mainVideo.removeEventListener("play", handleMainPlay);
+      mainVideo.removeEventListener("pause", handleMainPause);
+      mainVideo.removeEventListener("seeked", handleMainSeeked);
+      mainVideo.removeEventListener("timeupdate", syncVideos);
+    };
+  }, [isVertical]);
 
   const handleCreate = async () => {
     try {
@@ -46,20 +120,155 @@ const CampaignCard = ({
     }
   };
 
+  const togglePlay = (e) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play();
+    }
+  };
+
+  const handleRestart = (e) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.currentTime = 0;
+    video.play();
+  };
+
+  const handleProgressClick = (e) => {
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video || !duration) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const newTime = (clickX / rect.width) * duration;
+    video.currentTime = newTime;
+  };
+
+  const formatTime = (time) => {
+    if (isNaN(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
   const renderMedia = () => {
     if (campaign.cover.type === "VIDEO") {
       return (
-        <div className="relative w-full h-48 group overflow-hidden">
+        <div
+          className="relative w-full h-48 group overflow-hidden bg-black"
+          onMouseEnter={() => setShowControls(true)}
+          onMouseLeave={() => setShowControls(false)}
+        >
+          {/* Blur background for vertical videos */}
+          {isVertical && (
+            <video
+              ref={backgroundVideoRef}
+              src={campaign.cover.url}
+              className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60"
+              muted
+              playsInline
+            />
+          )}
+
+          {/* Main video */}
           <video
+            ref={videoRef}
             src={campaign.cover.url}
-            className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
-            controls
+            className={cn(
+              "relative w-full h-full transition-transform duration-300 group-hover:scale-105",
+              isVertical ? "object-contain" : "object-cover"
+            )}
             muted
+            playsInline
+            onClick={togglePlay}
+          />
+
+          {/* Video overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Play/Pause overlay */}
+          {!isPlaying && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm"
+              onClick={togglePlay}
+            >
+              <div className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:bg-white transition-colors cursor-pointer">
+                <Play className="w-8 h-8 text-black ml-1" />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Custom Controls */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{
+              opacity: showControls || !isPlaying ? 1 : 0,
+              y: showControls || !isPlaying ? 0 : 20,
+            }}
+            transition={{ duration: 0.2 }}
+            className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
           >
-            <source src={campaign.cover.url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            {/* Progress bar */}
+            <div
+              className="w-full h-1 bg-white/30 rounded-full mb-3 cursor-pointer overflow-hidden"
+              onClick={handleProgressClick}
+            >
+              <div
+                className="h-full bg-white rounded-full transition-all duration-150"
+                style={{
+                  width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+                }}
+              />
+            </div>
+
+            {/* Control buttons */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={togglePlay}
+                  className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+                >
+                  {isPlaying ? (
+                    <Pause className="w-4 h-4 text-white" />
+                  ) : (
+                    <Play className="w-4 h-4 text-white ml-0.5" />
+                  )}
+                </button>
+
+                <button
+                  onClick={handleRestart}
+                  className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-white" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 text-white text-xs">
+                <span>{formatTime(currentTime)}</span>
+                <span>/</span>
+                <span>{formatTime(duration)}</span>
+                {isVertical && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs border-white/30 text-white bg-white/10"
+                  >
+                    Dọc
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </motion.div>
         </div>
       );
     }

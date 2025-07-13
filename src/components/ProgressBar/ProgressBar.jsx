@@ -1,7 +1,5 @@
 const ProgressBar = ({ value, max, tokenSymbol }) => {
   const percentage = (value / max) * 100 > 100 ? 100 : (value / max) * 100;
-  console.log(tokenSymbol);
-
   return (
     <div className="w-full">
       <div className="w-full bg-gray-200 rounded-full h-2 relative">

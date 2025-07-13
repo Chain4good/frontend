@@ -137,7 +137,7 @@ export const getFileInfo = (url) => {
     ogg: { type: "audio", icon: Music, color: "text-purple-500" },
 
     // Documents
-    pdf: { type: "document", icon: FileText, color: "text-red-500" },
+    pdf: { type: "pdf", icon: FileText, color: "text-red-500" },
     doc: { type: "document", icon: FileText, color: "text-blue-600" },
     docx: { type: "document", icon: FileText, color: "text-blue-600" },
 

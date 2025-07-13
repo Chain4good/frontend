@@ -11,26 +11,19 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import useCampaign from "@/hooks/useCampaign";
 import { useCategory } from "@/hooks/useCategory";
 import { useCountry } from "@/hooks/useCountry";
-import {
-  AlertCircle,
-  MapPin,
-  Grid3X3,
-  Globe,
-  Tag,
-  Check,
-  Sparkles,
-  Heart,
-  Users,
-  GraduationCap,
-  Stethoscope,
-  Home,
-  Briefcase,
-  Shield,
-  Info,
-} from "lucide-react";
-import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { truncate } from "lodash";
+import {
+  AlertCircle,
+  Check,
+  Globe,
+  Grid3X3,
+  Info,
+  MapPin,
+  Sparkles,
+  Tag,
+} from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const Category = () => {
   const { data: categories, isLoading } = useCategory();
@@ -38,29 +31,6 @@ const Category = () => {
   const { newCampaign, changeCampaignValue } = useCampaign();
   const location = useLocation();
   const error = location.state?.error;
-
-  const getCategoryIcon = (categoryName) => {
-    const name = categoryName?.toLowerCase() || "";
-    if (name.includes("giáo dục") || name.includes("education"))
-      return <GraduationCap className="w-4 h-4" />;
-    if (
-      name.includes("y tế") ||
-      name.includes("medical") ||
-      name.includes("sức khỏe")
-    )
-      return <Stethoscope className="w-4 h-4" />;
-    if (name.includes("từ thiện") || name.includes("charity"))
-      return <Heart className="w-4 h-4" />;
-    if (name.includes("cộng đồng") || name.includes("community"))
-      return <Users className="w-4 h-4" />;
-    if (name.includes("nhà ở") || name.includes("housing"))
-      return <Home className="w-4 h-4" />;
-    if (name.includes("kinh doanh") || name.includes("business"))
-      return <Briefcase className="w-4 h-4" />;
-    if (name.includes("bảo vệ") || name.includes("protection"))
-      return <Shield className="w-4 h-4" />;
-    return <Tag className="w-4 h-4" />;
-  };
 
   const container = {
     hidden: { opacity: 0 },

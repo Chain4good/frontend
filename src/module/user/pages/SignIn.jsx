@@ -64,7 +64,7 @@ const SignInPage = () => {
 
   const handleLoginWithGoogle = () => {
     window.location.href = import.meta.env.VITE_APP_BACKEND_URL
-      ? import.meta.env.VITE_APP_BACKEND_URL + "auth/google"
+      ? import.meta.env.VITE_APP_BACKEND_URL + "/auth/google"
       : "https://api.chain4good.io.vn/auth/google";
   };
 
@@ -193,21 +193,21 @@ const SignInPage = () => {
                 >
                   <div className="flex items-center justify-center gap-3">
                     <motion.div
-                      animate={
-                        isLoggingIn || pendingAutoLogin
-                          ? { rotate: 360 }
-                          : isConnected
-                          ? {}
-                          : { rotate: 360 }
-                      }
-                      transition={{
-                        duration: 2,
-                        repeat:
-                          isLoggingIn || pendingAutoLogin || !isConnected
-                            ? Infinity
-                            : 0,
-                        ease: "linear",
-                      }}
+                    // animate={
+                    //   isLoggingIn || pendingAutoLogin
+                    //     ? { rotate: 360 }
+                    //     : isConnected
+                    //     ? {}
+                    //     : { rotate: 360 }
+                    // }
+                    // transition={{
+                    //   duration: 2,
+                    //   repeat:
+                    //     isLoggingIn || pendingAutoLogin || !isConnected
+                    //       ? Infinity
+                    //       : 0,
+                    //   ease: "linear",
+                    // }}
                     >
                       <Wallet
                         className="h-5 w-5 text-primary"

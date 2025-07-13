@@ -9,9 +9,11 @@ import Auth from "./Auth";
 import useCampaign from "@/hooks/useCampaign";
 import { toast } from "sonner";
 import { createCampaign } from "@/services/campaignService";
+import useUserStore from "@/hooks/useUserStore";
 
 const CreateLayout = () => {
   const navigate = useNavigate();
+  const { user } = useUserStore();
   const { steps, nextStep, prevStep, currentStep, canGoNext, canGoPrev } =
     useCreateStep();
   const { newCampaign } = useCampaign();
@@ -57,6 +59,15 @@ const CreateLayout = () => {
   const handleFinish = () => {
     createNewCampaign(newCampaign);
   };
+
+  // useEffect(() => {
+  //   console.log(user);
+
+  //   if (!user) {
+  //     toast.warning("Vui lòng đăng nhập để tạo chiến dịch");
+  //     navigate("/sign-in", { replace: true });
+  //   }
+  // }, [user]);
 
   return (
     <div className="bg-[#F4F2EC] grid grid-cols-3 w-screen h-screen">
