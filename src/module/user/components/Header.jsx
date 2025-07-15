@@ -92,18 +92,32 @@ const Header = () => {
               <h3 className="font-semibold mb-2">Quyên góp</h3>
               <div className="grid gap-2 pl-2">
                 <Link to="/discover">Danh mục</Link>
-                <Link to="/category">Hỗ trợ khẩn cấp</Link>
-                <Link to="/category">Quỹ tác động xã hội</Link>
-                <Link to="/category">Không gian ủng hộ</Link>
+                <Link to="/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain">
+                  Hỗ trợ khẩn cấp
+                </Link>
+                <Link to="/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain">
+                  Quỹ tác động xã hội
+                </Link>
+                <Link to="/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain">
+                  Không gian ủng hộ
+                </Link>
               </div>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Gây quỹ</h3>
               <div className="grid gap-2 pl-2">
-                <Link to="/category">Cách bắt đầu</Link>
-                <Link to="/category">Danh mục gây quỹ</Link>
-                <Link to="/category">Gây quỹ theo nhóm</Link>
-                <Link to="/category">Blog về gây quỹ</Link>
+                <Link to="/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain">
+                  Cách bắt đầu
+                </Link>
+                <Link to="/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain">
+                  Danh mục gây quỹ
+                </Link>
+                <Link to="/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain">
+                  Gây quỹ theo nhóm
+                </Link>
+                <Link to="/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain">
+                  Blog về gây quỹ
+                </Link>
               </div>
             </div>
           </div>
@@ -196,19 +210,25 @@ const Header = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <NavLink
-                          href={"/category"}
+                          href={
+                            "/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain"
+                          }
                           title={"Cách bắt đầu một chiến dịch Chain4Good"}
                           sub={
                             "Hướng dẫn từng bước, ví dụ minh họa và hơn thế nữa"
                           }
                         />
                         <NavLink
-                          href={"/category"}
+                          href={
+                            "/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain"
+                          }
                           title={"Danh mục gây quỹ"}
                           sub={"Tìm danh mục phù hợp với bạn"}
                         />
                         <NavLink
-                          href={"/category"}
+                          href={
+                            "/post/khi-lng-tt-c-ghi-du-vnh-vin-trn-blockchain"
+                          }
                           title={"Gây quỹ theo nhóm"}
                           sub={"Gây quỹ cùng với một nhóm"}
                         />
