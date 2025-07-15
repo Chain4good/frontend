@@ -16,3 +16,11 @@ export const createComment = async (values) => {
   const { data } = await requestInstance.post(url, values);
   return data;
 };
+
+export const toggleLikeComment = async (id) => {
+  const url = queryString.stringifyUrl({
+    url: `${CommentV1.LIKE_COMMENT}${id}/like`,
+  });
+  const { data } = await requestInstance.post(url);
+  return data;
+};

@@ -75,10 +75,38 @@ export const getCampaigns = async (filters) => {
   // await new Promise((resolve) => setTimeout(resolve, 1500)); // 1.5 second delay
 
   const url = queryString.stringifyUrl({
-    url: CampaignV1.GET_CAMPAIGNS,
+    url: CampaignV1.GET_CAMPAIGNS_VALID,
     query: {
       ...filters,
     },
+  });
+  const { data } = await requestInstance.get(url);
+  return data;
+};
+
+export const calculateGoal = async (amount, token) => {
+  const url = queryString.stringifyUrl({
+    url: CampaignV1.GET_CALCULATE_GOAL,
+    query: {
+      vndAmount: amount,
+      token,
+    },
+  });
+  const { data } = await requestInstance.get(url);
+  return data;
+};
+
+export const createCampaignProgress = async (campaignId, progressData) => {
+  const url = queryString.stringifyUrl({
+    url: `${CampaignV1.CREATE_CAMPAIGN_PROGRESS}${campaignId}/progress`,
+  });
+  const { data } = await requestInstance.post(url, progressData);
+  return data;
+};
+
+export const getCampaignProgress = async (campaignId) => {
+  const url = queryString.stringifyUrl({
+    url: `${CampaignV1.GET_CAMPAIGN_PROGRESS}${campaignId}/progress`,
   });
   const { data } = await requestInstance.get(url);
   return data;

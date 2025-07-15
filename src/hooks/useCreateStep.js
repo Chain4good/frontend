@@ -3,44 +3,47 @@ import { create } from "zustand";
 const useCreateStep = create((set, get) => ({
   steps: [
     {
-      title: "Fundraise",
-      description: "Start fundraising, tips, and resources",
+      title: "Danh mục",
+      description: "Chọn danh mục gây quỹ phù hợp với chiến dịch của bạn",
       slug: "/create/fundraiser/category",
     },
     {
-      title: "Goal",
-      description: "Set your fundraising goal",
+      title: "Mục tiêu",
+      description: "Thiết lập mục tiêu gây quỹ và thời hạn chiến dịch",
       slug: "/create/fundraiser/goal",
     },
     {
-      title: "Type",
-      description: "Select your fundraising type",
+      title: "Hình thức",
+      description: "Lựa chọn hình thức gây quỹ (cá nhân, tổ chức, dự án...)",
       slug: "/create/fundraiser/types",
     },
     {
-      title: "Description",
-      description: "Start fundraising, tips, and resources",
+      title: "Nội dung",
+      description:
+        "Mô tả chi tiết về chiến dịch, mục đích và kế hoạch sử dụng quỹ",
       slug: "/create/fundraiser/description",
     },
     {
-      title: "Media",
-      description: "Start fundraising, tips, and resources",
+      title: "Hình ảnh/Video",
+      description: "Thêm hình ảnh, video để minh họa cho chiến dịch của bạn",
       slug: "/create/fundraiser/media",
     },
     {
-      title: "Finish",
-      description: "Start fundraising, tips, and resources",
+      title: "Hoàn tất",
+      description: "Xem lại và hoàn tất thiết lập chiến dịch gây quỹ",
       slug: "/create/fundraiser/finish",
     },
   ],
   currentStep: 0,
 
+  // Đặt bước hiện tại
   setStep: (stepIndex) => {
     if (stepIndex >= 0 && stepIndex < get().steps.length) {
       set({ currentStep: stepIndex });
     }
   },
 
+  // Chuyển đến bước tiếp theo
   nextStep: () => {
     const { currentStep, steps } = get();
     if (currentStep < steps.length - 1) {
@@ -48,6 +51,7 @@ const useCreateStep = create((set, get) => ({
     }
   },
 
+  // Quay lại bước trước
   prevStep: () => {
     const { currentStep } = get();
     if (currentStep > 0) {
@@ -55,11 +59,13 @@ const useCreateStep = create((set, get) => ({
     }
   },
 
+  // Kiểm tra có thể đi tiếp
   canGoNext: () => {
     const { currentStep, steps } = get();
     return currentStep < steps.length - 1;
   },
 
+  // Kiểm tra có thể quay lại
   canGoPrev: () => {
     const { currentStep } = get();
     return currentStep > 0;

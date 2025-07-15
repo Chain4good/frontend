@@ -2,6 +2,10 @@ export const AuthV1 = {
   LOGIN: "/auth/login",
   REGISTER: "/auth/register",
   GET_PROFILE: "/auth/profile",
+  LOGOUT: "/auth/logout",
+  VERIFY_EMAIL: "/auth/verify-email",
+  RESEND_VERIFICATION_EMAIL: "/auth/resend-otp",
+  WEB3_LOGIN: "/auth/web3-login",
 };
 
 export const CategoryV1 = {
@@ -37,12 +41,16 @@ export const CoverV1 = {
 
 export const CampaignV1 = {
   GET_CAMPAIGNS: "/campaigns",
+  GET_CAMPAIGNS_VALID: "/campaigns/valid",
   GET_CAMPAIGN: "/campaigns",
   CREATE_CAMPAIGN: "/campaigns",
   UPDATE_CAMPAIGN: "/campaigns",
   DELETE_CAMPAIGN: "/campaigns",
   GET_MY_CAMPAIGNS: "/campaigns/my-campaigns",
   GET_CALCULATE_ETH_GOAL: "/campaigns/calculate-eth-goal",
+  GET_CALCULATE_GOAL: "/campaigns/calculate-goal",
+  CREATE_CAMPAIGN_PROGRESS: "/campaigns/",
+  GET_CAMPAIGN_PROGRESS: "/campaigns/",
 };
 
 export const DonationV1 = {
@@ -60,6 +68,7 @@ export const CommentV1 = {
   UPDATE_COMMENT: "/comments",
   DELETE_COMMENT: "/comments",
   GET_COMMENT_BY_CAMPAIGN: "/comments/campaign",
+  LIKE_COMMENT: "/comments/",
 };
 
 export const UserV1 = {
@@ -71,5 +80,42 @@ export const UserV1 = {
 };
 
 export const AiV1 = {
-  AI_ANALYZE_CAMPAIGN: "/ai/analyze-campaign",
+  AI_ANALYZE_CAMPAIGN: "/ai/analyze-campaign-gemini",
+  AI_OPTIMIZE_CAMPAIGN: "/ai/optimize-campaign",
+  AI_RECOMMENDATIONS: "/ai/recommendations",
+  AI_CAMPAIGN_AUDIO: "/ai/campaigns/",
+};
+
+export const NotificationV1 = {
+  GET_NOTIFICATIONS: "/notifications",
+  GET_NOTIFICATION: "/notifications",
+  CREATE_NOTIFICATION: "/notifications",
+  UPDATE_NOTIFICATION: "/notifications",
+  DELETE_NOTIFICATION: "/notifications",
+  READ_NOTIFICATION: "/notifications",
+  MARK_ALL_AS_READ: "/notifications/mark-all-read",
+  UNREAD_COUNT: "/notifications/unread-count",
+};
+
+export const TopicV1 = {
+  GET_TOPICS: "/topics",
+  GET_TOPIC: "/topics",
+  CREATE_TOPIC: "/topics",
+  UPDATE_TOPIC: "/topics",
+  DELETE_TOPIC: "/topics",
+};
+
+export const PostV1 = {
+  GET_POSTS: "/posts",
+  GET_POST: "/posts",
+  CREATE_POST: "/posts",
+  UPDATE_POST: "/posts",
+  DELETE_POST: "/posts",
+  GET_POST_BY_SLUG: "/posts/slug",
+};
+
+export const ReportV1 = {
+  GET_REPORTS: "/reports",
+  GET_REPORT: "/reports",
+  CREATE_REPORT: "/reports",
 };

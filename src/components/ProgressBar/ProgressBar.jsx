@@ -1,7 +1,5 @@
-const ProgressBar = ({ value, max }) => {
-  const percentage = (value / max) * 100;
-  console.log(percentage);
-
+const ProgressBar = ({ value, max, tokenSymbol }) => {
+  const percentage = (value / max) * 100 > 100 ? 100 : (value / max) * 100;
   return (
     <div className="w-full">
       <div className="w-full bg-gray-200 rounded-full h-2 relative">
@@ -14,10 +12,12 @@ const ProgressBar = ({ value, max }) => {
         <p className=" text-black font-semibold">
           {percentage === 100
             ? "Đã hoàn thành"
-            : `${value.toLocaleString()} ETH`}
+            : `${value.toLocaleString()} ${tokenSymbol}`}
         </p>
         <p>
-          <span className="text-gray-500">{max.toLocaleString()} ETH</span>
+          <span className="text-gray-500">
+            {max.toLocaleString()} {tokenSymbol}
+          </span>
         </p>
       </div>
     </div>

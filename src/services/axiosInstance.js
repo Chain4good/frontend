@@ -1,9 +1,23 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_APP_BACKEND_URL || "http://185.200.65.252:3000",
-  timeout: 120000,
+  baseURL:
+    import.meta.env.VITE_APP_BACKEND_URL || "https://api.chain4good.io.vn",
   withCredentials: true,
 });
 
@@ -20,24 +34,50 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu lỗi 401 và chưa thử refresh token
-    if (error.response.status === 401 && !originalRequest._retry) {
+    // Helper function to extract error data
+    const getErrorData = (error) => {
+      const response = error?.response?.data;
+      if (typeof response === "object") {
+        return response;
+      }
+      return {
+        message: typeof response === "string" ? response : "Có lỗi xảy ra",
+        status: error?.response?.status,
+        error: true,
+      };
+    };
+
+    if (error?.response?.status === 401 && !originalRequest._retry) {
+      if (originalRequest.url === "/auth/login") {
+        return Promise.reject(getErrorData(error));
+      }
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => instance(originalRequest))
+          .catch((err) => Promise.reject(getErrorData(err)));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        // Gọi API refresh token
         await instance.post("/auth/refresh");
-
-        // Thử lại request ban đầu
+        processQueue(null);
+        isRefreshing = false;
         return instance(originalRequest);
       } catch (refreshError) {
-        // Nếu refresh token thất bại, chuyển về trang login
-        // window.location.href = "/login";
-        return Promise.reject(refreshError);
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        Cookies.remove("access_token");
+        window.location.href = "/sign-in";
+        return Promise.reject(getErrorData(refreshError));
       }
     }
 
-    return Promise.reject(error);
+    return Promise.reject(getErrorData(error));
   }
 );
 

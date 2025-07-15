@@ -2,13 +2,17 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { formatDistance } from "date-fns";
-import { vi } from "date-fns/locale"; // Add this import
+import { vi } from "date-fns/locale";
 import { Heart, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageSquare } from "lucide-react";
 import CommentForm from "./CommentForm";
 import useUserStore from "@/hooks/useUserStore";
 import { toast } from "sonner";
+import { toggleLikeComment } from "@/services/commentService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 
 const Comment = ({
   comment,
@@ -23,8 +27,8 @@ const Comment = ({
   const [showAll, setShowAll] = useState(false);
   const { user } = useUserStore();
   const isReplyFormVisible = activeReplyId === comment.id;
+  const queryClient = useQueryClient();
 
-  // Filter replies based on showAll state
   const displayedReplies =
     showAll || showAllReplies
       ? comment.replies
@@ -32,13 +36,67 @@ const Comment = ({
 
   const hasMoreReplies = !showAll && comment.replies?.length > maxReplies;
 
+  const { mutate: handleLike, isPending: isLiking } = useMutation({
+    mutationFn: () => toggleLikeComment(comment.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["comments"]);
+    },
+  });
+
+  const LikeButton = () => {
+    const isLiked = comment.Like?.some((like) => like.userId === user?.id);
+
+    return (
+      <Button
+        variant={isLiked ? "liked" : "ghost"}
+        size="sm"
+        className={cn(
+          isLiked ? "text-red-500" : "text-muted-foreground",
+          isLiking && "opacity-50 cursor-not-allowed"
+        )}
+        onClick={() => {
+          if (!user) return toast.warning("Vui lòng đăng nhập!");
+          if (isLiking) return;
+          handleLike();
+        }}
+        disabled={isLiking}
+      >
+        <Heart className={cn("w-4 h-4 mr-2", isLiked && "fill-red-500")} />
+        {comment._count.Like}
+      </Button>
+    );
+  };
+
+  // Replace existing like button with new component
   return (
     <>
       <div className={`flex gap-4 ${level > 0 ? "ml-12" : ""}`}>
-        <Avatar>
+        {/* <Avatar>
           <AvatarImage src={comment.user.image} />
           <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
-        </Avatar>
+        </Avatar> */}
+        <div>
+          <div className="relative">
+            <Avatar className="h-8 w-8 md:h-10 md:w-10">
+              <AvatarImage src={comment?.user?.image} />
+              <AvatarFallback>CG</AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-1 -right-1 flex">
+              {comment?.user?.UserBadge?.map((userBadge, index) => (
+                <TooltipProvider key={userBadge.badge.id}>
+                  <Tooltip content={userBadge.badge.description}>
+                    <img
+                      src={userBadge.badge.iconUrl}
+                      alt={userBadge.badge.name}
+                      className="w-4 h-4 md:w-5 md:h-5"
+                      style={{ marginLeft: index > 0 ? "-6px" : "0" }}
+                    />
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
+            </div>
+          </div>
+        </div>
         <div className="flex-1 space-y-2">
           <div className="bg-muted p-4 rounded-lg">
             <div className="flex items-center justify-between mb-2">
@@ -68,10 +126,7 @@ const Comment = ({
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-muted-foreground">
-              <Heart className="w-4 h-4 mr-2" />
-              {comment._count.Like}
-            </Button>
+            <LikeButton />
             <Button
               variant="ghost"
               size="sm"

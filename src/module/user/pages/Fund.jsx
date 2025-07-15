@@ -1,43 +1,52 @@
+import AnalysisResult from "@/components/AnalysisResult";
+import AnalyzeButton from "@/components/AnalyzeButton";
+import DonationChart from "@/components/DonationChart";
 import FundSkeleton from "@/components/FundSkeleton";
 import ReadMore from "@/components/ReadMore/ReadMore";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import ReportCampaignButton from "@/components/ReportCampaignButton";
 import { Separator } from "@/components/ui/separator";
-import VideoPlayer from "@/components/VideoPlayer/VideoPlayer";
-import { CampaignStatus } from "@/constants/status";
 import { useCharityDonation } from "@/hooks/useCharityDonation";
+import useUserStore from "@/hooks/useUserStore";
 import { formatCampaign, formattedDonors } from "@/lib/utils";
-import { getCampaignById } from "@/services/campaignService";
+import { analyzeCampaign } from "@/services/aiService";
+import { getCampaignById, updateCampaign } from "@/services/campaignService";
 import {
   createComment,
   getCommentsByCampaign,
 } from "@/services/commentService";
-import { analyzeCampaign } from "@/services/aiService";
-import { AvatarImage } from "@radix-ui/react-avatar";
+import { getDonationHistory } from "@/services/donationService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 import CommentBox from "../components/CommentBox";
+import CreateProgressDialog from "../components/CreateProgressDialog";
+import Forbidden from "../components/Forbidden";
+import FundCreator from "../components/Fund/FundCreator";
+import FundGallery from "../components/Fund/FundGallery";
+import FundHeader from "../components/Fund/FundHeader";
+import FundMedia from "../components/Fund/FundMedia";
 import FundBox from "../components/FundBox";
+import ProgressList from "../components/ProgressList";
 import ShareModal from "../components/ShareModal";
-import AnalysisResult from "@/components/AnalysisResult";
-import AnalyzeButton from "@/components/AnalyzeButton";
+import GenerateAudioButton from "@/components/GenerateAudioButton";
+import AudioPlayer from "../components/AudioPlayer";
 
 const Fund = () => {
   const { id } = useParams();
-  const { getCampaign, getDonors, listenToFundsWithdrawn } =
-    useCharityDonation();
+  const {
+    getCampaign,
+    getDonors,
+    listenToFundsWithdrawn,
+    getCampaignStatus,
+    listenToDonationMade,
+    getCampaignCloseHistory,
+  } = useCharityDonation();
   const queryClient = useQueryClient();
   const [selectedImage, setSelectedImage] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [campaignStatus, setCampaignStatus] = useState(null);
+  const { user } = useUserStore();
 
   const {
     data: campaign,
@@ -46,30 +55,9 @@ const Fund = () => {
   } = useQuery({
     queryKey: ["campaign", id],
     queryFn: () => getCampaignById(id),
+
     enabled: !!id,
   });
-
-  const renderMedia = (cover) => {
-    if (!cover) return null;
-
-    if (cover.type === "VIDEO") {
-      return (
-        <VideoPlayer
-          src={cover.url}
-          // onVideoClick={() => setSelectedImage(cover.url)}
-        />
-      );
-    }
-
-    return (
-      <img
-        className="rounded-lg shadow-md w-full h-96 object-cover"
-        src={cover.url}
-        onClick={() => setSelectedImage(cover.url)}
-        alt={campaign.title}
-      />
-    );
-  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -79,6 +67,8 @@ const Fund = () => {
     queryKey: ["campaignOnChain", campaign?.chainCampaignId],
     queryFn: async () => {
       const data = await getCampaign(campaign.chainCampaignId);
+      console.log("data", data);
+
       return formatCampaign(data);
     },
     enabled: !!campaign?.chainCampaignId,
@@ -88,9 +78,26 @@ const Fund = () => {
     queryKey: ["donors", campaign?.chainCampaignId],
     queryFn: async () => {
       const data = await getDonors(campaign.chainCampaignId);
-      return formattedDonors(data);
+      return formattedDonors(data, onChainCampaign?.tokenAddress);
     },
     enabled: !!campaign?.chainCampaignId,
+  });
+
+  const { data: closeHistory, isLoading: isCloseHistoryLoading } = useQuery({
+    queryKey: ["campaignCloseHistory", campaign?.chainCampaignId],
+    queryFn: async () => {
+      try {
+        const history = await getCampaignCloseHistory(campaign.chainCampaignId);
+        return history;
+      } catch (error) {
+        if (error?.code === 4100) {
+          throw new Error("Vui lòng kết nối ví để xem thông tin này");
+        }
+        throw error;
+      }
+    },
+    enabled: !!campaign?.chainCampaignId,
+    retry: false, // Don't retry on error
   });
 
   useEffect(() => {
@@ -118,6 +125,74 @@ const Fund = () => {
     };
   }, [campaign?.chainCampaignId, id, listenToFundsWithdrawn]);
 
+  useEffect(() => {
+    let cleanupFunction;
+
+    const setupListener = async () => {
+      if (campaign?.chainCampaignId) {
+        try {
+          cleanupFunction = await listenToDonationMade(
+            campaign.chainCampaignId,
+            () => {
+              queryClient.invalidateQueries([
+                "campaignOnChain",
+                campaign.chainCampaignId,
+              ]);
+              queryClient.invalidateQueries([
+                "donors",
+                campaign.chainCampaignId,
+              ]);
+              queryClient.invalidateQueries(["donationHistory", id]);
+            }
+          );
+        } catch (error) {
+          console.error("Error setting up event listener:", error);
+        }
+      }
+    };
+
+    setupListener();
+
+    return () => {
+      if (typeof cleanupFunction === "function") {
+        cleanupFunction();
+      }
+    };
+  }, [campaign?.chainCampaignId, id, listenToDonationMade, queryClient]);
+
+  useEffect(() => {
+    const fetchCampaignStatus = async () => {
+      try {
+        const status = await getCampaignStatus(campaign.chainCampaignId);
+        const { isActive, isSuccessful, remainingTime } = status;
+
+        setCampaignStatus({
+          isActive,
+          isSuccessful,
+          remainingTime: Number(remainingTime),
+        });
+
+        if (!isActive) {
+          if (isSuccessful) {
+            updateCampaign(campaign.id, {
+              status: "FINISHED",
+            });
+          } else {
+            updateCampaign(campaign.id, {
+              status: "CANCELLED",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching campaign status:", error);
+      }
+    };
+
+    if (campaign?.chainCampaignId) {
+      fetchCampaignStatus();
+    }
+  }, [campaign?.chainCampaignId, onChainCampaign]);
+
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
     queryKey: ["comments", campaign?.id],
     queryFn: () => getCommentsByCampaign(campaign.id),
@@ -142,7 +217,6 @@ const Fund = () => {
     mutationFn: analyzeCampaign,
     onSuccess: (data) => {
       setAnalysisResult(data);
-      console.log("Analysis complete:", data);
     },
     onError: (error) => {
       console.error("Analysis failed:", error);
@@ -173,115 +247,163 @@ const Fund = () => {
     });
   };
 
+  const { data: donationHistory } = useQuery({
+    queryKey: ["donationHistory", id],
+    queryFn: () => getDonationHistory(id),
+    enabled: !!id,
+  });
   return (
-    <div className="container py-6 md:py-10 px-4 md:px-6">
-      {isLoading && <FundSkeleton />}
-      {error && <div>Error: {error.message}</div>}
-      {campaign && (
-        <>
-          <h1 className="text-2xl md:text-4xl font-semibold pb-4 md:pb-6">
-            {campaign.title}
-          </h1>
+    <>
+      <Helmet>
+        <title>
+          {campaign?.title
+            ? `${campaign.title} | Chain4Good`
+            : "Chiến dịch | Chain4Good"}
+        </title>
+        <meta
+          name="description"
+          content={
+            campaign?.description?.slice(0, 155) ||
+            "Tham gia đóng góp vào chiến dịch từ thiện trên Chain4Good. Mọi giao dịch đều minh bạch và được lưu trữ trên blockchain."
+          }
+        />
+        <meta
+          property="og:title"
+          content={
+            campaign?.title
+              ? `${campaign.title} | Chain4Good`
+              : "Chiến dịch | Chain4Good"
+          }
+        />
+        <meta
+          property="og:description"
+          content={
+            campaign?.description?.slice(0, 155) ||
+            "Tham gia đóng góp vào chiến dịch từ thiện trên Chain4Good. Mọi giao dịch đều minh bạch và được lưu trữ trên blockchain."
+          }
+        />
+        <meta property="og:image" content={campaign?.cover?.url || ""} />
+        <meta property="og:type" content="website" />
+      </Helmet>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 ">
-            <div className="col-span-1 md:col-span-2">
-              <div className="relative">
-                {renderMedia(campaign.cover)}
-                {campaign.status === "FINISHED" && (
-                  <Badge className="absolute top-4 left-4" variant={"default"}>
-                    <CheckCircle className="mr-2 h-3 w-3 md:h-4 md:w-4" />
-                    {CampaignStatus[campaign.status]}
-                  </Badge>
+      <div className="container py-6 md:py-10 px-4 md:px-6">
+        {isLoading && <FundSkeleton />}
+        {error && error?.statusCode === 403 && <Forbidden />}
+        {campaign && (
+          <>
+            <FundHeader campaign={campaign} />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              <div className="col-span-1 md:col-span-2">
+                <FundMedia
+                  cover={campaign.cover}
+                  campaignStatus={campaignStatus}
+                  onImageClick={setSelectedImage}
+                />
+
+                <FundCreator
+                  campaign={campaign}
+                  onChainCampaign={onChainCampaign}
+                />
+
+                <Separator className="my-6 md:my-8" />
+                <div className="mb-6">
+                  <div className="flex gap-2">
+                    <AnalyzeButton
+                      onClick={handleAnalyzeCampaign}
+                      isAnalyzing={isAnalyzing}
+                    />
+                    {!campaign.audio && (
+                      <GenerateAudioButton campaignId={campaign.id} />
+                    )}
+                  </div>
+                  {(analysisResult || isAnalyzing) && (
+                    <AnalysisResult
+                      analysis={analysisResult}
+                      isLoading={isAnalyzing}
+                    />
+                  )}
+                </div>
+
+                <Separator />
+                {campaign?.audio && (
+                  <>
+                    <Separator className="my-6 md:my-8" />
+                    <div className="mt-4 md:mt-6">
+                      <AudioPlayer audioUrl={campaign.audio} />
+                    </div>
+                  </>
                 )}
+                <ReadMore
+                  className="text-base md:text-lg mt-4 md:mt-6"
+                  text={campaign?.description}
+                />
+
+                <Separator className="my-6 md:my-8" />
+                <div className="mt-4 md:mt-6">
+                  {campaign?.status === "ACTIVE" && (
+                    <div className="flex justify-end">
+                      {campaign?.userId === user?.id && (
+                        <CreateProgressDialog campaignId={id} />
+                      )}
+                    </div>
+                  )}
+                  <ProgressList campaignId={id} />
+                </div>
+
+                <div className="mt-8">
+                  {donationHistory && (
+                    <DonationChart
+                      symbol={campaign?.tokenSymbol}
+                      data={donationHistory.data}
+                      summary={donationHistory.summary}
+                    />
+                  )}
+                </div>
+
+                <Separator className="my-6 md:my-8" />
+                <div className="mt-4 md:mt-6">
+                  <FundGallery
+                    images={campaign.images}
+                    onImageClick={setSelectedImage}
+                  />
+                </div>
+
+                <Separator className="my-6 md:my-8" />
+
+                <div className="mt-6 md:mt-8">
+                  <h2 className="text-xl md:text-2xl font-semibold mb-4">
+                    Bình luận
+                  </h2>
+                  <CommentBox
+                    comments={comments}
+                    onAddComment={handleAddComment}
+                    onReply={handleReply}
+                    isLoading={isCommentsLoading}
+                    isSubmitting={isAddingComment || isReplying}
+                  />
+                </div>
+                {/* Add progress section */}
               </div>
 
-              <div className="flex gap-3 md:gap-4 items-center mt-4 pb-4">
-                <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                  <AvatarImage src={campaign?.user?.image} />
-                  <AvatarFallback>CG</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="text-sm md:text-base">
-                    <strong>{campaign?.user?.name}</strong> đang tổ chức buổi
-                    gây quỹ
-                  </div>
-                  <p className="text-muted-foreground text-xs md:text-sm">
-                    {onChainCampaign?.creator}
-                  </p>
+              <div className="col-span-1 order-first md:order-none mb-4 md:mb-0">
+                <FundBox
+                  donors={donors}
+                  onChainCampaign={onChainCampaign}
+                  campaign={campaign}
+                  isDonorsLoading={isDonorsLoading}
+                />
+                <div className="flex justify-end mt-4">
+                  <ReportCampaignButton campaignId={campaign.id} />
                 </div>
               </div>
-              <Separator className="my-6 md:my-8" />
+            </div>
 
-              <div className="mb-6">
-                <AnalyzeButton
-                  onClick={handleAnalyzeCampaign}
-                  isAnalyzing={isAnalyzing}
-                />
-                {(analysisResult || isAnalyzing) && (
-                  <AnalysisResult
-                    analysis={analysisResult}
-                    isLoading={isAnalyzing}
-                  />
-                )}
-              </div>
-              <Separator />
-              <ReadMore
-                className="text-base md:text-lg mt-4 md:mt-6"
-                text={campaign?.description}
-              />
-              <Separator className="my-6 md:my-8" />
-              <div className="mt-4 md:mt-6">
-                <Carousel className="w-full">
-                  <CarouselContent className="ml-2 md:ml-4">
-                    {campaign?.images?.map((image, index) => (
-                      <CarouselItem
-                        key={index}
-                        className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
-                      >
-                        <div
-                          className="rounded-md aspect-square overflow-hidden cursor-pointer"
-                          onClick={() => setSelectedImage(image.url)}
-                        >
-                          <img
-                            src={image.url}
-                            alt=""
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="hidden md:flex" />
-                  <CarouselNext className="hidden md:flex" />
-                </Carousel>
-              </div>
-              <Separator className="my-6 md:my-8" />
-              <div className="mt-6 md:mt-8">
-                <h2 className="text-xl md:text-2xl font-semibold mb-4">
-                  Bình luận
-                </h2>
-                <CommentBox
-                  comments={comments}
-                  onAddComment={handleAddComment}
-                  onReply={handleReply}
-                  isLoading={isCommentsLoading}
-                  isSubmitting={isAddingComment || isReplying}
-                />
-              </div>
-            </div>
-            <div className="col-span-1 order-first md:order-none mb-4 md:mb-0">
-              <FundBox
-                donors={donors}
-                onChainCampaign={onChainCampaign}
-                campaign={campaign}
-                isDonorsLoading={isDonorsLoading}
-              />
-            </div>
-          </div>
-          <ShareModal />
-        </>
-      )}
-    </div>
+            <ShareModal />
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

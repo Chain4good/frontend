@@ -1,108 +1,68 @@
-import Topic from "../components/Topic";
+import { usePost } from "@/hooks/usePost";
+import { getCampaigns } from "@/services/campaignService";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import Banner from "../components/Banner";
-import Guide from "../components/Guide";
-import KeyFeature from "../components/KeyFeature";
+import BehindTheBanner from "../components/BehindTheBanner";
+import BehindTheBanner2 from "../components/BehindTheBanner2";
 import Discover from "../components/Discover";
-import CampaignList from "@/components/CampaignList/CampaignList";
-import CreateCampaign from "@/components/CreateCampaign/CreateCampaign";
+import Guide from "../components/Guide";
+import HowWork from "../components/HowWork";
+import KeyFeature from "../components/KeyFeature";
+import Topic from "../components/Topic";
 
 export default function Home() {
-  return (
-    <main className="">
-      <section className="relative">
-        {/* Fixed typo: session -> section */}
-        <div className="">
-          <Banner />
-        </div>
-        <BehindTheBanner />
-      </section>
-      <KeyFeature />
-      <Guide />
-      <div className="container mx-auto px-4">
-        {" "}
-        {/* Added padding for mobile */}
-        <Discover />
-      </div>
-      <Topic />
-    </main>
-  );
-}
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: 4,
+  });
+  const { data: posts, isLoading } = usePost(filters);
+  // const { data: recommendationsData } = useQuery({
+  //   queryKey: ["recommendations"],
+  //   queryFn: () => recommendations(),
+  //   enabled: true,
+  // });
 
-const BehindTheBanner = () => {
+  const { data: campaigns } = useQuery({
+    queryKey: ["campaigns"],
+    queryFn: () =>
+      getCampaigns({
+        page: 1,
+        limit: 6,
+      }),
+  });
   return (
     <>
-      <div className="-z-10 bl absolute flex items-center overflow-hidden justify-center top-0 left-0 right-0 bottom-0">
-        <div className=" md:size-[1300px] size-[600px] rounded-full border border-dashed border-gray-200 flex items-center justify-center">
-          <div className="size-[300px] md:size-[600px] rounded-full border border-dashed"></div>
+      <Helmet>
+        <title>Trang chủ | Chain4Good</title>
+        <meta
+          name="description"
+          content="Nền tảng gây quỹ từ thiện phi tập trung. Quyên góp và giúp đỡ người khác một cách minh bạch."
+        />
+        <meta property="og:title" content="Trang chủ | Chain4Good" />
+        <meta
+          property="og:description"
+          content="Nền tảng gây quỹ từ thiện phi tập trung. Quyên góp và giúp đỡ người khác một cách minh bạch."
+        />
+        <meta property="og:type" content="website" />
+      </Helmet>
+      <main className="relative min-h-screen">
+        <section className="relative w-full">
+          <div className="relative z-10">
+            <Banner />
+          </div>
+          <BehindTheBanner />
+          <BehindTheBanner2 campaigns={campaigns} />
+        </section>
+        <KeyFeature />
+        <Guide />
+        <div className="container mx-auto px-4 py-8">
+          <Discover campaigns={campaigns} />
         </div>
-      </div>
-      <div className="-z-20 blur-2xl hidden md:flex gap-10 flex-col items-center justify-center text-9xl top-0 left-0 right-0 bottom-0 absolute">
-        {/* Desktop layout */}
-        <div className="flex gap-80">
-          <img
-            src="/hero-animals-2.png"
-            className="animate-gentleFloat w-[140px] h-[140px]"
-          />
-          <img
-            src="/hero-business-1.png"
-            className="animate-gentleFloat3 w-[140px] h-[140px]"
-          />
-        </div>
-        <div className="flex gap-[800px]">
-          <img
-            src="/hero-education-1.png"
-            className="animate-gentleFloat2 w-[140px] h-[140px]"
-          />
-          <img
-            src="/hero-business-4.png"
-            className="animate-gentleFloat3 w-[140px] h-[140px]"
-          />
-        </div>
-        <div className="flex gap-80">
-          <img
-            src="/hero-education-2.png"
-            className="animate-gentleFloat2 w-[140px] h-[140px]"
-          />
-          <img
-            src="/hero-education-3.png"
-            className="animate-gentleFloat w-[140px] h-[140px]"
-          />
-        </div>
-      </div>
-
-      {/* Mobile layout */}
-      <div className="-z-20 blur-2xl flex md:hidden gap-6 flex-col items-center justify-center text-9xl top-0 left-0 right-0 bottom-0 absolute">
-        <div className="flex gap-20">
-          <img
-            src="/hero-animals-2.png"
-            className="animate-gentleFloat w-[80px] h-[80px]"
-          />
-          <img
-            src="/hero-business-1.png"
-            className="animate-gentleFloat3 w-[80px] h-[80px]"
-          />
-        </div>
-        <div className="flex gap-32">
-          <img
-            src="/hero-education-1.png"
-            className="animate-gentleFloat2 w-[80px] h-[80px]"
-          />
-          <img
-            src="/hero-business-4.png"
-            className="animate-gentleFloat3 w-[80px] h-[80px]"
-          />
-        </div>
-        <div className="flex gap-20">
-          <img
-            src="/hero-education-2.png"
-            className="animate-gentleFloat2 w-[80px] h-[80px]"
-          />
-          <img
-            src="/hero-education-3.png"
-            className="animate-gentleFloat w-[80px] h-[80px]"
-          />
-        </div>
-      </div>
+        <Topic posts={posts} />
+        <HowWork />
+      </main>
     </>
   );
-};
+}

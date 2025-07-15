@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -9,9 +9,11 @@ import Auth from "./Auth";
 import useCampaign from "@/hooks/useCampaign";
 import { toast } from "sonner";
 import { createCampaign } from "@/services/campaignService";
+import useUserStore from "@/hooks/useUserStore";
 
 const CreateLayout = () => {
   const navigate = useNavigate();
+  const { user } = useUserStore();
   const { steps, nextStep, prevStep, currentStep, canGoNext, canGoPrev } =
     useCreateStep();
   const { newCampaign } = useCampaign();
@@ -20,7 +22,6 @@ const CreateLayout = () => {
     mutationFn: createCampaign,
     onSuccess: (data) => {
       toast.success("Chiến dịch tạo thành công!");
-      console.log(data);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -58,6 +59,15 @@ const CreateLayout = () => {
   const handleFinish = () => {
     createNewCampaign(newCampaign);
   };
+
+  // useEffect(() => {
+  //   console.log(user);
+
+  //   if (!user) {
+  //     toast.warning("Vui lòng đăng nhập để tạo chiến dịch");
+  //     navigate("/sign-in", { replace: true });
+  //   }
+  // }, [user]);
 
   return (
     <div className="bg-[#F4F2EC] grid grid-cols-3 w-screen h-screen">
@@ -107,7 +117,7 @@ const CreateLayout = () => {
             >
               {isPending ? (
                 <>
-                  <span className="animate-spin mr-2">◯</span>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   Đang xử lý...
                 </>
               ) : (

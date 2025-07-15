@@ -33,7 +33,7 @@ const MetaMaskAccount = () => {
   return (
     <Button
       variant={account ? "secondary" : "default"}
-      className="w-full md:w-32 md:rounded-full text-xs font-medium transition-all"
+      className="w-full md:w-40 md:rounded-full font-mono text-xs font-medium transition-all"
       onClick={getCurrentAccount}
     >
       <Wallet className="mr-2" />

@@ -4,6 +4,11 @@ const useUserStore = create((set) => ({
   user: null,
   isAuthenticated: false,
   accessToken: null,
+  userData: null,
+  setUserData: (userData) =>
+    set({
+      userData: userData,
+    }),
 
   setUser: (userData) =>
     set({

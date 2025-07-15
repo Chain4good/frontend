@@ -8,6 +8,8 @@ export const signup = async (data) => {
     url: AuthV1.REGISTER,
   });
   const response = await requestInstance.post(url, data);
+  const userStore = useUserStore.getState();
+  userStore.setUserData(response.data.data);
   return response;
 };
 
@@ -26,5 +28,53 @@ export const getProfile = async () => {
   const response = await requestInstance.get(url);
   const userStore = useUserStore.getState();
   userStore.setUser(response.data);
+  return response;
+};
+
+export const logout = async () => {
+  const url = queryString.stringifyUrl({
+    url: AuthV1.LOGOUT,
+  });
+  const { data } = await requestInstance.post(url);
+  return data;
+};
+
+export const verifyEmail = async (otp) => {
+  const url = queryString.stringifyUrl({
+    url: AuthV1.VERIFY_EMAIL,
+  });
+  const userStore = useUserStore.getState();
+  const userData = userStore.userData;
+  const response = await requestInstance.post(url, {
+    email: userData.email,
+    code: otp,
+    userData: {
+      ...userData,
+    },
+  });
+  return response;
+};
+export const resendVerificationEmail = async () => {
+  const url = queryString.stringifyUrl({
+    url: AuthV1.RESEND_VERIFICATION_EMAIL,
+  });
+  const userStore = useUserStore.getState();
+  const userData = userStore.userData;
+  const response = await requestInstance.post(url, {
+    email: userData.email,
+  });
+  return response;
+};
+
+export const loginWithWeb3 = async (address, signature) => {
+  const url = queryString.stringifyUrl({
+    url: AuthV1.WEB3_LOGIN,
+  });
+  const response = await requestInstance.post(url, {
+    address,
+    signature,
+  });
+  const userStore = useUserStore.getState();
+  userStore.setUserData(response.data.data);
   return response;
 };
