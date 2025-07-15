@@ -1,0 +1,88 @@
+# CodeRabbit Configuration
+# This file configures CodeRabbit AI code reviews for your repository
+
+# Review settings
+reviews:
+  # Enable review status messages
+  review_status: true
+
+  # Enable auto reviews on all branches (not just default branch)
+  auto_review:
+    enabled: true
+    # Enable reviews on all branches including base/target branches
+    base_branches: ["main", "dev", "test"]
+    # Enable reviews on feature branches
+    drafts: true
+
+  # Review triggers
+  triggers:
+    # Review on pull request creation and updates
+    pull_request: true
+    # Review on push to tracked branches
+    push: true
+
+  # File patterns to include/exclude
+  path_filters:
+    # Include common web development files
+    include:
+      - "**/*.js"
+      - "**/*.jsx"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.json"
+      - "**/*.md"
+      - "**/*.css"
+      - "**/*.scss"
+      - "**/*.html"
+      - "**/*.yaml"
+      - "**/*.yml"
+
+    # Exclude generated files and dependencies
+    exclude:
+      - "node_modules/**"
+      - "dist/**"
+      - "build/**"
+      - "*.min.js"
+      - "*.min.css"
+      - "package-lock.json"
+      - "yarn.lock"
+
+# Language and framework specific settings
+language:
+  javascript:
+    # Enable JavaScript/React specific reviews
+    enabled: true
+    # Focus on React patterns and best practices
+    frameworks: ["react"]
+
+  typescript:
+    enabled: true
+
+# Review focus areas
+focus:
+  # Code quality and best practices
+  code_quality: true
+  # Security vulnerabilities
+  security: true
+  # Performance optimizations
+  performance: true
+  # Documentation and comments
+  documentation: true
+  # Testing coverage and quality
+  testing: true
+
+# Notification settings
+notifications:
+  # Enable review completion notifications
+  review_complete: true
+  # Enable notifications for high-priority issues
+  high_priority_issues: true
+
+# Integration settings
+integrations:
+  # GitHub integration settings
+  github:
+    # Enable status checks
+    status_checks: true
+    # Enable review comments
+    review_comments: true
