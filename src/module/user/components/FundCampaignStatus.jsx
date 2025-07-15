@@ -33,19 +33,12 @@ const CampaignStatus = ({ status }) => {
             )}
           </Badge>
 
-          {!isActive && (
+          {!isActive && isSuccessful && (
             <Badge variant={isSuccessful ? "success" : "destructive"}>
-              {isSuccessful ? (
-                <span className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Thành công
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <XCircle className="h-3 w-3" />
-                  Chưa đạt mục tiêu
-                </span>
-              )}
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="h-3 w-3" />
+                Thành công
+              </span>
             </Badge>
           )}
         </div>

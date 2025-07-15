@@ -178,114 +178,120 @@ const FundBox = ({ campaign, onChainCampaign, donors, isDonorsLoading }) => {
           </div>
         </div>
         <div className="flex gap-3 flex-col">
-          {campaign.status !== "FINISHED" && campaign.chainCampaignId && (
-            <>
-              <ShareModal campaign={campaign} />
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="text-lg font-medium">
-                    <HandHeart className="mr-2 h-5 w-5" /> Quyên góp
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-semibold text-center pb-2">
-                      Quyên góp cho chiến dịch
-                    </DialogTitle>
-                    <p className="text-center text-muted-foreground">
-                      Mọi khoản đóng góp đều có ý nghĩa, dù lớn hay nhỏ
-                    </p>
-                  </DialogHeader>
-                  <div className="space-y-6 pt-4">
-                    <div className="space-y-4">
-                      <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Mục tiêu
-                          </span>
-                          <span className="font-medium">
-                            {onChainCampaign?.goal.formatted}{" "}
-                            {onChainCampaign?.goal.symbol}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Đã quyên góp
-                          </span>
-                          <span className="font-medium">
-                            {onChainCampaign?.totalDonated.formatted}{" "}
-                            {onChainCampaign?.totalDonated.symbol}
-                          </span>
-                        </div>
-                        <Progress value={progress} className="h-2" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                          Chọn token
-                        </label>
-                        <TokenSelectModal
-                          campaignAcceptToken={onChainCampaign?.tokenAddress}
-                          selectedToken={selectedToken}
-                          onSelect={(token) => setSelectedToken(token.id)}
-                          disabled={isLoading}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label htmlFor="amount" className="text-sm font-medium">
-                          Số lượng {selectedToken} muốn quyên góp
-                        </label>
-                        <div className="relative">
-                          <Input
-                            id="amount"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            placeholder="0.00"
-                            className="pr-12 text-lg"
-                          />
-                          <div className="absolute inset-y-0 right-3 flex items-center text-sm font-medium text-muted-foreground">
-                            {selectedToken}
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Tối thiểu {selectedToken === "ETH" ? "0.01" : "1"}{" "}
-                          {selectedToken}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      className="w-full h-12 text-lg font-medium"
-                      onClick={handleDonate}
-                      disabled={isLoading || !amount || Number(amount) <= 0}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                          Đang xử lý...
-                        </>
-                      ) : (
-                        "Xác nhận quyên góp"
-                      )}
+          {campaign.status !== "FINISHED" &&
+            campaign.status !== "CANCELLED" &&
+            campaign.chainCampaignId && (
+              <>
+                <ShareModal campaign={campaign} />
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="text-lg font-medium">
+                      <HandHeart className="mr-2 h-5 w-5" /> Quyên góp
                     </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-semibold text-center pb-2">
+                        Quyên góp cho chiến dịch
+                      </DialogTitle>
+                      <p className="text-center text-muted-foreground">
+                        Mọi khoản đóng góp đều có ý nghĩa, dù lớn hay nhỏ
+                      </p>
+                    </DialogHeader>
+                    <div className="space-y-6 pt-4">
+                      <div className="space-y-4">
+                        <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Mục tiêu
+                            </span>
+                            <span className="font-medium">
+                              {onChainCampaign?.goal.formatted}{" "}
+                              {onChainCampaign?.goal.symbol}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Đã quyên góp
+                            </span>
+                            <span className="font-medium">
+                              {onChainCampaign?.totalDonated.formatted}{" "}
+                              {onChainCampaign?.totalDonated.symbol}
+                            </span>
+                          </div>
+                          <Progress value={progress} className="h-2" />
+                        </div>
 
-                    <p className="text-xs text-center text-muted-foreground">
-                      Bằng cách quyên góp, bạn đồng ý với{" "}
-                      <a href="#" className="underline hover:text-primary">
-                        điều khoản dịch vụ
-                      </a>{" "}
-                      của chúng tôi
-                    </p>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          )}
-          {campaign.status === "FINISHED" && (
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            Chọn token
+                          </label>
+                          <TokenSelectModal
+                            campaignAcceptToken={onChainCampaign?.tokenAddress}
+                            selectedToken={selectedToken}
+                            onSelect={(token) => setSelectedToken(token.id)}
+                            disabled={isLoading}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label
+                            htmlFor="amount"
+                            className="text-sm font-medium"
+                          >
+                            Số lượng {selectedToken} muốn quyên góp
+                          </label>
+                          <div className="relative">
+                            <Input
+                              id="amount"
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={amount}
+                              onChange={(e) => setAmount(e.target.value)}
+                              placeholder="0.00"
+                              className="pr-12 text-lg"
+                            />
+                            <div className="absolute inset-y-0 right-3 flex items-center text-sm font-medium text-muted-foreground">
+                              {selectedToken}
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Tối thiểu {selectedToken === "ETH" ? "0.01" : "1"}{" "}
+                            {selectedToken}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Button
+                        className="w-full h-12 text-lg font-medium"
+                        onClick={handleDonate}
+                        disabled={isLoading || !amount || Number(amount) <= 0}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            Đang xử lý...
+                          </>
+                        ) : (
+                          "Xác nhận quyên góp"
+                        )}
+                      </Button>
+
+                      <p className="text-xs text-center text-muted-foreground">
+                        Bằng cách quyên góp, bạn đồng ý với{" "}
+                        <a href="#" className="underline hover:text-primary">
+                          điều khoản dịch vụ
+                        </a>{" "}
+                        của chúng tôi
+                      </p>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
+            )}
+          {(campaign.status === "FINISHED" ||
+            campaign.status === "CANCELLED") && (
             <Button size="lg" className="" variant="outline">
               <Clock /> Chiến dịch gây quỹ đã kết thúc
             </Button>
