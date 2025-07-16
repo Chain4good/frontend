@@ -63,9 +63,12 @@ const SignInPage = () => {
   };
 
   const handleLoginWithGoogle = () => {
-    window.location.href = import.meta.env.VITE_APP_BACKEND_URL
-      ? import.meta.env.VITE_APP_BACKEND_URL + "auth/google"
-      : "https://api.chain4good.io.vn/auth/google";
+    const baseUrl =
+      import.meta.env.VITE_APP_BACKEND_URL || "https://api.chain4good.io.vn";
+    const normalizedUrl = baseUrl.endsWith("/")
+      ? baseUrl.slice(0, -1)
+      : baseUrl;
+    window.location.href = `${normalizedUrl}/auth/google`;
   };
 
   const container = {
